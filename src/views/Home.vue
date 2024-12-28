@@ -55,11 +55,11 @@
             </div>
           </template>
           <div class="quick-actions">
-            <el-button type="primary" @click="$router.push('/lost-items')">
+            <el-button type="primary" @click="$router.push('/publish-item?type=lost')">
               <el-icon><Search /></el-icon>
               发布丢失物品
             </el-button>
-            <el-button type="success" @click="$router.push('/found-items')">
+            <el-button type="success" @click="$router.push('/publish-item?type=found')">
               <el-icon><Box /></el-icon>
               发布拾取物品
             </el-button>
@@ -155,8 +155,10 @@ onMounted(async () => {
 
 const fetchStats = async () => {
   try {
-    const data = await request.get('/api/stats')
-    stats.value = data
+    const { data } = await request.get('/stats')
+    if (data) {
+      stats.value = data
+    }
   } catch (error) {
     console.error('获取统计数据失败:', error)
   }

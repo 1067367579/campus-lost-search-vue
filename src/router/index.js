@@ -18,70 +18,79 @@ const routes = [
   {
     path: '/',
     component: () => import('@/layouts/DefaultLayout.vue'),
-    meta: { requiresAuth: true },
     children: [
-      // 普通用户和管理员共用路由
       {
         path: '',
         name: 'Home',
-        component: () => import('@/views/Home.vue')
-      },
-      {
-        path: 'profile',
-        name: 'Profile',
-        component: () => import('@/views/Profile.vue')
+        component: () => import('@/views/Home.vue'),
+        meta: { requiresAuth: true }
       },
       {
         path: 'lost-items',
         name: 'LostItems',
-        component: () => import('@/views/items/LostItems.vue')
+        component: () => import('@/views/items/LostItems.vue'),
+        meta: { requiresAuth: true }
       },
       {
         path: 'found-items',
         name: 'FoundItems',
-        component: () => import('@/views/items/FoundItems.vue')
+        component: () => import('@/views/items/FoundItems.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
+        path: 'publish-item',
+        name: 'PublishItem',
+        component: () => import('@/views/items/PublishItem.vue'),
+        meta: { requiresAuth: true }
       },
       {
         path: 'my-claims',
         name: 'MyClaims',
-        component: () => import('@/views/claims/MyClaims.vue')
+        component: () => import('@/views/claims/MyClaims.vue'),
+        meta: { requiresAuth: true }
       },
       {
         path: 'my-complaints',
         name: 'MyComplaints',
-        component: () => import('@/views/complaints/MyComplaints.vue')
+        component: () => import('@/views/complaints/MyComplaints.vue'),
+        meta: { requiresAuth: true }
       },
-      // 管理员专属路由
       {
-        path: 'admin',
-        meta: { requiresAdmin: true },
-        children: [
-          {
-            path: 'dashboard',
-            name: 'AdminDashboard',
-            component: () => import('@/views/admin/Dashboard.vue')
-          },
-          {
-            path: 'claims',
-            name: 'AdminClaims',
-            component: () => import('@/views/admin/Claims.vue')
-          },
-          {
-            path: 'complaints',
-            name: 'AdminComplaints',
-            component: () => import('@/views/admin/Complaints.vue')
-          },
-          {
-            path: 'blacklist',
-            name: 'AdminBlacklist',
-            component: () => import('@/views/admin/Blacklist.vue')
-          },
-          {
-            path: 'operation-logs',
-            name: 'AdminLogs',
-            component: () => import('@/views/admin/OperationLogs.vue')
-          }
-        ]
+        path: 'profile',
+        name: 'Profile',
+        component: () => import('@/views/Profile.vue'),
+        meta: { requiresAuth: true }
+      },
+      // 管理员路由
+      {
+        path: 'admin/dashboard',
+        name: 'AdminDashboard',
+        component: () => import('@/views/admin/Dashboard.vue'),
+        meta: { requiresAuth: true, requiresAdmin: true }
+      },
+      {
+        path: 'admin/claims',
+        name: 'AdminClaims',
+        component: () => import('@/views/admin/Claims.vue'),
+        meta: { requiresAuth: true, requiresAdmin: true }
+      },
+      {
+        path: 'admin/complaints',
+        name: 'AdminComplaints',
+        component: () => import('@/views/admin/Complaints.vue'),
+        meta: { requiresAuth: true, requiresAdmin: true }
+      },
+      {
+        path: 'admin/blacklist',
+        name: 'AdminBlacklist',
+        component: () => import('@/views/admin/Blacklist.vue'),
+        meta: { requiresAuth: true, requiresAdmin: true }
+      },
+      {
+        path: 'admin/operation-logs',
+        name: 'AdminOperationLogs',
+        component: () => import('@/views/admin/OperationLogs.vue'),
+        meta: { requiresAuth: true, requiresAdmin: true }
       }
     ]
   }
@@ -96,8 +105,20 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const userStore = useUserStore()
   
-  // 如果有token但没有用户信息，先获取用户信息
-  if (userStore.token && !userStore.userInfo) {
+  // 如果是不需要认证的页面(登录/注册)，直接放行
+  if (!to.meta.requiresAuth) {
+    next()
+    return
+  }
+  
+  // 如果需要认证但没有token，跳转到登录页
+  if (!userStore.token) {
+    next('/login')
+    return
+  }
+  
+  // 如果有token但没有用户信息，获取用户信息
+  if (!userStore.userInfo) {
     try {
       await userStore.getUserInfo()
     } catch (error) {
@@ -107,11 +128,7 @@ router.beforeEach(async (to, from, next) => {
     }
   }
   
-  if (to.meta.requiresAuth && !userStore.isLoggedIn) {
-    next('/login')
-    return
-  }
-  
+  // 如果需要管理员权限但不是管理员，跳转到首页
   if (to.meta.requiresAdmin && !userStore.isAdmin) {
     next('/')
     return

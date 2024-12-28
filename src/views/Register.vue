@@ -53,7 +53,7 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, watch, onUnmounted, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import request from '@/utils/request'
@@ -125,15 +125,41 @@ const handleRegister = async () => {
     if (valid) {
       try {
         const { confirmPassword, ...registerData } = registerForm
-        await request.post('/api/user/register', registerData)
-        ElMessage.success('注册成功')
-        router.push('/login')
+        const { data } = await request.post('user/register', registerData)
+        if (data) {
+          ElMessage.success('注册成功，请登录')
+          // 清空表单数据
+          localStorage.removeItem('registerForm')
+          // 确保跳转执行
+          await router.push('/login')
+        }
       } catch (error) {
-        ElMessage.error(error.message || '注册失败')
+        ElMessage.error(error.response?.data?.message || '注册失败')
       }
     }
   })
 }
+
+// 添加表单数据本地存储
+const saveFormData = () => {
+  localStorage.setItem('registerForm', JSON.stringify(registerForm))
+}
+
+// 在输入时保存数据
+watch(registerForm, saveFormData, { deep: true })
+
+// 组件卸载时清除数据
+onUnmounted(() => {
+  localStorage.removeItem('registerForm')
+})
+
+// 组件挂载时恢复数据
+onMounted(() => {
+  const savedData = localStorage.getItem('registerForm')
+  if (savedData) {
+    Object.assign(registerForm, JSON.parse(savedData))
+  }
+})
 </script>
 
 <style scoped>

@@ -4,7 +4,7 @@ import { ElMessage } from 'element-plus'
 import router from '@/router'
 
 const request = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: '/api',
   timeout: 5000
 })
 
@@ -15,6 +15,12 @@ request.interceptors.request.use(
     if (userStore.token) {
       config.headers.Authorization = `Bearer ${userStore.token}`
     }
+    
+    // 确保 url 正确
+    if (!config.url.startsWith('/')) {
+      config.url = '/' + config.url
+    }
+    
     return config
   },
   error => {
@@ -25,35 +31,12 @@ request.interceptors.request.use(
 // 响应拦截器
 request.interceptors.response.use(
   response => {
-    const { code, message, data } = response.data
-    
-    if (code === 200) {
-      return data
-    }
-    
-    // 特殊状态码处理
-    if (code === 401) {
-      const userStore = useUserStore()
-      userStore.logout()
-      router.push('/login')
-      ElMessage.error('登录已过期，请重新登录')
-    } else if (code === 403) {
-      ElMessage.error('没有操作权限')
-    } else {
-      ElMessage.error(message || '请求失败')
-    }
-    
-    return Promise.reject(new Error(message || '请求失败'))
+    // 直接返回响应数据，不再判断code
+    return response.data
   },
   error => {
-    if (error.response?.status === 401) {
-      const userStore = useUserStore()
-      userStore.logout()
-      router.push('/login')
-      ElMessage.error('登录已过期，请重新登录')
-    } else {
-      ElMessage.error(error.message || '网络错误')
-    }
+    const errorMessage = error.response?.data?.message || error.message || '网络错误'
+    ElMessage.error(errorMessage)
     return Promise.reject(error)
   }
 )

@@ -26,6 +26,7 @@
           </template>
           <el-menu-item index="/lost-items">丢失物品</el-menu-item>
           <el-menu-item index="/found-items">拾取物品</el-menu-item>
+          <el-menu-item index="/publish-item">发布物品</el-menu-item>
         </el-sub-menu>
 
         <!-- 认领相关 -->
@@ -101,7 +102,7 @@
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item command="profile">个人资料</el-dropdown-item>
-                <el-dropdown-item divided command="logout">退出登录</el-dropdown-item>
+                <el-dropdown-item divided command="logout">退��登录</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
@@ -154,7 +155,7 @@ const breadcrumbs = computed(() => {
     '/found-items': { title: '拾取物品' },
     '/my-claims': { title: '我的认领' },
     '/my-complaints': { title: '我的投诉' },
-    '/profile': { title: '个人资料' },
+    '/profile': { title: '个人资���' },
     '/admin/dashboard': { title: '控制台' },
     '/admin/claims': { title: '认领管理' },
     '/admin/complaints': { title: '投诉管理' },

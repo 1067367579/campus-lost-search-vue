@@ -3,14 +3,5 @@
 </template>
 
 <script setup>
-import { useUserStore } from '@/stores/user'
-import { onMounted } from 'vue'
-
-const userStore = useUserStore()
-
-onMounted(() => {
-  if (userStore.token) {
-    userStore.getUserInfo()
-  }
-})
+// 删除自动获取用户信息的逻辑
 </script>

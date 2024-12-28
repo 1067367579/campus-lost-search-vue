@@ -63,18 +63,15 @@ const handleLogin = async () => {
   await loginFormRef.value.validate(async (valid) => {
     if (valid) {
       try {
-        const data = await request.post('/api/user/login', loginForm)
-        userStore.setToken(data.token)
-        userStore.setUserInfo({
-          userId: data.userId,
-          username: data.username,
-          userType: data.userType
-        })
-        
-        ElMessage.success('登录成功')
-        router.push('/')
+        const { data } = await request.post('user/login', loginForm)
+        if (data) {
+          userStore.setToken(data.token)
+          userStore.setUserInfo(data)
+          ElMessage.success('登录成功')
+          await router.push('/')
+        }
       } catch (error) {
-        ElMessage.error(error.message || '登录失败')
+        ElMessage.error(error.response?.data?.message || '登录失败')
       }
     }
   })
