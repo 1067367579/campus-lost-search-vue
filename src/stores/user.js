@@ -29,14 +29,37 @@ export const useUserStore = defineStore('user', () => {
     localStorage.removeItem('token')
   }
   
-  const updateUserInfo = (info) => {
-    userInfo.value = { ...userInfo.value, ...info }
+  const updateUserInfo = async (updateData) => {
+    try {
+      await request.put('user/info', updateData)
+      setUserInfo({ ...userInfo.value, ...updateData })
+    } catch (error) {
+      throw error
+    }
   }
   
   const getUserInfo = async () => {
     try {
       const data = await request.get('user/info')
       setUserInfo(data)
+    } catch (error) {
+      throw error
+    }
+  }
+  
+  const login = async (loginData) => {
+    try {
+      const data = await request.post('user/login', loginData)
+      setToken(data.token)
+      setUserInfo(data)
+    } catch (error) {
+      throw error
+    }
+  }
+  
+  const register = async (registerData) => {
+    try {
+      await request.post('user/register', registerData)
     } catch (error) {
       throw error
     }
@@ -61,6 +84,8 @@ export const useUserStore = defineStore('user', () => {
     isBlacklisted,
     updateUserInfo,
     getUserInfo,
-    initializeFromStorage
+    initializeFromStorage,
+    login,
+    register
   }
 })

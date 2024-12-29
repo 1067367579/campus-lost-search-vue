@@ -2,31 +2,26 @@
   <div class="login-container">
     <el-card class="login-card">
       <template #header>
-        <h2>登录</h2>
+        <h2 style="text-align: center;">校园失物招寻平台</h2>
       </template>
-      
-      <el-form 
-        ref="loginFormRef"
-        :model="loginForm"
-        :rules="rules"
-        label-width="80px"
-      >
+
+      <el-form ref="loginFormRef" :model="loginForm" :rules="rules" label-width="80px">
         <el-form-item label="用户名" prop="username">
           <el-input v-model="loginForm.username" />
         </el-form-item>
-        
+
         <el-form-item label="密码" prop="password">
-          <el-input 
-            v-model="loginForm.password"
-            type="password"
-            show-password
-          />
+          <el-input v-model="loginForm.password" type="password" show-password />
         </el-form-item>
-        
-        <el-form-item>
-          <el-button type="primary" @click="handleLogin">登录</el-button>
-          <el-button @click="$router.push('/register')">注册</el-button>
+
+       
+          <el-form-item>
+            <div style="margin-left: 13%;">
+              <el-button type="primary" @click="handleLogin">登录</el-button>
+              <el-button @click="$router.push('/register')">注册</el-button>
+            </div>
         </el-form-item>
+      
       </el-form>
     </el-card>
   </div>
@@ -59,11 +54,11 @@ const rules = {
 
 const handleLogin = async () => {
   if (!loginFormRef.value) return
-  
+
   await loginFormRef.value.validate(async (valid) => {
     if (valid) {
       try {
-        const { data } = await request.post('user/login', loginForm)
+        const data = await request.post('user/login', loginForm)
         if (data) {
           userStore.setToken(data.token)
           userStore.setUserInfo(data)
@@ -90,4 +85,4 @@ const handleLogin = async () => {
 .login-card {
   width: 400px;
 }
-</style> 
+</style>

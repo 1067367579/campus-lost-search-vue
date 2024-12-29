@@ -6,22 +6,21 @@
         <img src="/favicon.svg" alt="Logo">
         <span>失物招领平台</span>
       </div>
-      
-      <el-menu
-        :default-active="activeMenu"
-        class="menu"
-        :router="true"
-        :collapse="isCollapse"
-      >
+
+      <el-menu :default-active="activeMenu" class="menu" :router="true" :collapse="isCollapse">
         <el-menu-item index="/">
-          <el-icon><House /></el-icon>
+          <el-icon>
+            <House />
+          </el-icon>
           <template #title>首页</template>
         </el-menu-item>
 
         <!-- 物品相关 -->
         <el-sub-menu index="/items">
           <template #title>
-            <el-icon><Box /></el-icon>
+            <el-icon>
+              <Box />
+            </el-icon>
             <span>物品管理</span>
           </template>
           <el-menu-item index="/lost-items">丢失物品</el-menu-item>
@@ -31,13 +30,17 @@
 
         <!-- 认领相关 -->
         <el-menu-item index="/my-claims">
-          <el-icon><Document /></el-icon>
+          <el-icon>
+            <Document />
+          </el-icon>
           <template #title>我的认领</template>
         </el-menu-item>
 
         <!-- 投诉相关 -->
         <el-menu-item index="/my-complaints">
-          <el-icon><Warning /></el-icon>
+          <el-icon>
+            <Warning />
+          </el-icon>
           <template #title>我的投诉</template>
         </el-menu-item>
 
@@ -45,27 +48,37 @@
         <template v-if="userStore.isAdmin">
           <el-divider>管理员功能</el-divider>
           <el-menu-item index="/admin/dashboard">
-            <el-icon><DataBoard /></el-icon>
+            <el-icon>
+              <DataBoard />
+            </el-icon>
             <template #title>控制台</template>
           </el-menu-item>
-          
+
           <el-menu-item index="/admin/claims">
-            <el-icon><Document /></el-icon>
+            <el-icon>
+              <Document />
+            </el-icon>
             <template #title>认领管理</template>
           </el-menu-item>
-          
+
           <el-menu-item index="/admin/complaints">
-            <el-icon><Warning /></el-icon>
+            <el-icon>
+              <Warning />
+            </el-icon>
             <template #title>投诉管理</template>
           </el-menu-item>
-          
+
           <el-menu-item index="/admin/blacklist">
-            <el-icon><CircleClose /></el-icon>
+            <el-icon>
+              <CircleClose />
+            </el-icon>
             <template #title>黑名单管理</template>
           </el-menu-item>
-          
+
           <el-menu-item index="/admin/operation-logs">
-            <el-icon><List /></el-icon>
+            <el-icon>
+              <List />
+            </el-icon>
             <template #title>操作日志</template>
           </el-menu-item>
         </template>
@@ -77,15 +90,12 @@
       <!-- 顶部栏 -->
       <el-header class="header">
         <div class="header-left">
-          <el-button
-            type="text"
-            @click="toggleCollapse"
-          >
+          <el-button type="text" @click="toggleCollapse">
             <el-icon :size="20">
               <component :is="isCollapse ? 'Expand' : 'Fold'" />
             </el-icon>
           </el-button>
-          
+
           <el-breadcrumb>
             <el-breadcrumb-item v-for="item in breadcrumbs" :key="item.path" :to="item.path">
               {{ item.title }}
@@ -97,12 +107,14 @@
           <el-dropdown @command="handleCommand">
             <span class="user-dropdown">
               {{ userStore.userInfo?.username }}
-              <el-icon><CaretBottom /></el-icon>
+              <el-icon>
+                <CaretBottom />
+              </el-icon>
             </span>
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item command="profile">个人资料</el-dropdown-item>
-                <el-dropdown-item divided command="logout">退��登录</el-dropdown-item>
+                <el-dropdown-item divided command="logout">退出登录</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
@@ -279,4 +291,4 @@ const handleCommand = async (command) => {
 .fade-leave-to {
   opacity: 0;
 }
-</style> 
+</style>

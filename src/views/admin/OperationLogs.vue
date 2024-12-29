@@ -109,7 +109,7 @@ const fetchLogs = async () => {
       startTime: dateRange.value?.[0],
       endTime: dateRange.value?.[1]
     }
-    const data = await request.get('/api/admin/operation-logs', { params })
+    const data = await request.get('admin/operation-logs', { params })
     logs.value = data.list
     total.value = data.total
   } catch (error) {
@@ -130,7 +130,7 @@ const handleExport = async () => {
       startTime: dateRange.value?.[0],
       endTime: dateRange.value?.[1]
     }
-    const response = await request.get('/api/admin/operation-logs/export', { 
+    const response = await request.get('admin/operation-logs/export', { 
       params,
       responseType: 'blob'
     })

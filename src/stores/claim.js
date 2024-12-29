@@ -8,7 +8,7 @@ export const useClaimStore = defineStore('claim', () => {
 
   const submitClaim = async (claimData) => {
     try {
-      const data = await request.post('/api/claim', claimData)
+      const data = await request.post('claim', claimData)
       return data
     } catch (error) {
       console.error('提交认领申请失败:', error)
@@ -18,7 +18,7 @@ export const useClaimStore = defineStore('claim', () => {
 
   const submitComplaint = async (complaintData) => {
     try {
-      const data = await request.post('/api/complaint', complaintData)
+      const data = await request.post('complaint', complaintData)
       return data
     } catch (error) {
       console.error('提交投诉失败:', error)

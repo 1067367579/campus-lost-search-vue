@@ -146,16 +146,20 @@ const recentLostItems = ref([])
 const recentFoundItems = ref([])
 
 onMounted(async () => {
-  await Promise.all([
-    fetchStats(),
-    fetchAnnouncements(),
-    fetchRecentItems()
-  ])
+  try {
+    await Promise.allSettled([
+      fetchStats(),
+      fetchAnnouncements(),
+      fetchRecentItems()
+    ])
+  } catch (error) {
+    console.error('初始化数据失败:', error)
+  }
 })
 
 const fetchStats = async () => {
   try {
-    const { data } = await request.get('/stats')
+    const data = await request.get('stats')
     if (data) {
       stats.value = data
     }
@@ -166,10 +170,12 @@ const fetchStats = async () => {
 
 const fetchAnnouncements = async () => {
   try {
-    const data = await request.get('/api/announcements', {
+    const data = await request.get('announcement/list', {
       params: { pageSize: 5 }
     })
-    announcements.value = data.list
+    if (data?.list) {
+      announcements.value = data.list
+    }
   } catch (error) {
     console.error('获取公告失败:', error)
   }
@@ -178,15 +184,20 @@ const fetchAnnouncements = async () => {
 const fetchRecentItems = async () => {
   try {
     const [lostData, foundData] = await Promise.all([
-      request.get('/api/lost-item/list', {
+      request.get('lost-item/list', {
         params: { pageSize: 5 }
       }),
-      request.get('/api/found-item/list', {
+      request.get('found-item/list', {
         params: { pageSize: 5 }
       })
     ])
-    recentLostItems.value = lostData.list
-    recentFoundItems.value = foundData.list
+    
+    if (lostData?.list) {
+      recentLostItems.value = lostData.list
+    }
+    if (foundData?.list) {
+      recentFoundItems.value = foundData.list
+    }
   } catch (error) {
     console.error('获取最近物品失败:', error)
   }

@@ -116,6 +116,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useItemStore } from '@/stores/item'
 import { useClaimStore } from '@/stores/claim'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import request from '@/utils/request'
 
 const route = useRoute()
 const router = useRouter()
@@ -156,7 +157,7 @@ const fetchItems = async () => {
       pageNum: currentPage.value,
       pageSize: pageSize.value
     }
-    const data = await request.get(`/api/${isLost.value ? 'lost' : 'found'}-item/list`, { params })
+    const data = await request.get(`/${isLost.value ? 'lost' : 'found'}-item/list`, { params })
     itemList.value = data.list
     total.value = data.total
   } catch (error) {

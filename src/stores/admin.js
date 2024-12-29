@@ -12,7 +12,7 @@ export const useAdminStore = defineStore('admin', () => {
 
   const fetchPendingStats = async () => {
     try {
-      const data = await request.get('/api/admin/pending-stats')
+      const data = await request.get('admin/pending-stats')
       pendingStats.value = data
     } catch (error) {
       console.error('获取待处理事项统计失败:', error)
@@ -22,7 +22,7 @@ export const useAdminStore = defineStore('admin', () => {
 
   const addToBlacklist = async (blacklistData) => {
     try {
-      await request.post('/api/admin/blacklist', blacklistData)
+      await request.post('admin/blacklist', blacklistData)
     } catch (error) {
       console.error('添加黑名单失败:', error)
       throw error

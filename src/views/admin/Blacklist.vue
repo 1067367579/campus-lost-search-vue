@@ -97,7 +97,7 @@ const fetchBlacklist = async () => {
       pageNum: currentPage.value,
       pageSize: pageSize.value
     }
-    const data = await request.get('/api/admin/blacklist', { params })
+    const data = await request.get('admin/blacklist', { params })
     blacklist.value = data.list
     total.value = data.total
   } catch (error) {
@@ -114,7 +114,7 @@ const handleSearch = () => {
 
 const handleRemove = async (row) => {
   try {
-    await request.delete(`/api/admin/blacklist/${row.blacklistId}`)
+    await request.delete(`admin/blacklist/${row.blacklistId}`)
     ElMessage.success('已解除黑名单')
     fetchBlacklist()
   } catch (error) {

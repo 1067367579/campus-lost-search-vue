@@ -125,12 +125,10 @@ const handleRegister = async () => {
     if (valid) {
       try {
         const { confirmPassword, ...registerData } = registerForm
-        const { data } = await request.post('user/register', registerData)
+        const data = await request.post('user/register', registerData)
         if (data) {
           ElMessage.success('注册成功，请登录')
-          // 清空表单数据
           localStorage.removeItem('registerForm')
-          // 确保跳转执行
           await router.push('/login')
         }
       } catch (error) {

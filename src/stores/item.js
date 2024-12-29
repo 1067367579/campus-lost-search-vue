@@ -9,7 +9,7 @@ export const useItemStore = defineStore('item', () => {
 
   const fetchCategories = async () => {
     try {
-      const data = await request.get('/api/category/list')
+      const data = await request.get('category/list')
       categories.value = data
     } catch (error) {
       console.error('获取物品类别失败:', error)
@@ -19,7 +19,7 @@ export const useItemStore = defineStore('item', () => {
 
   const publishLostItem = async (itemData) => {
     try {
-      const data = await request.post('/api/lost-item', itemData)
+      const data = await request.post('lost-item', itemData)
       return data
     } catch (error) {
       console.error('发布丢失物品失败:', error)
@@ -29,7 +29,7 @@ export const useItemStore = defineStore('item', () => {
 
   const publishFoundItem = async (itemData) => {
     try {
-      const data = await request.post('/api/found-item', itemData)
+      const data = await request.post('found-item', itemData)
       return data
     } catch (error) {
       console.error('发布拾取物品失败:', error)

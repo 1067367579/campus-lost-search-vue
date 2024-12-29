@@ -163,7 +163,7 @@ const blacklistForm = reactive({
 const blacklistRules = {
   reason: [
     { required: true, message: '请输入原因', trigger: 'blur' },
-    { min: 10, max: 500, message: '长度在 10 �� 500 个字符', trigger: 'blur' }
+    { min: 10, max: 500, message: '长度在 10 ��� 500 个字符', trigger: 'blur' }
   ]
 }
 
@@ -197,7 +197,7 @@ const fetchClaims = async () => {
       pageNum: currentPage.value,
       pageSize: pageSize.value
     }
-    const data = await request.get('/api/admin/claims', { params })
+    const data = await request.get('admin/claims', { params })
     claimList.value = data.list
     total.value = data.total
   } catch (error) {
@@ -224,7 +224,7 @@ const handleProcess = async (row, status) => {
       }
     )
     
-    await request.put(`/api/admin/claims/${row.claimId}`, { status })
+    await request.put(`admin/claims/${row.claimId}`, { status })
     ElMessage.success('处理成功')
     fetchClaims()
   } catch (error) {

@@ -167,7 +167,7 @@ const fetchClaims = async () => {
       pageNum: currentPage.value,
       pageSize: pageSize.value
     }
-    const data = await request.get('/api/claim/list', { params })
+    const data = await request.get('claim/list', { params })
     claimList.value = data.list
     total.value = data.total
   } catch (error) {

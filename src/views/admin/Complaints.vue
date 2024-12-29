@@ -68,7 +68,7 @@
               link
               @click="showFeedback(row)"
             >
-              查看���果
+              查看结果
             </el-button>
           </template>
         </el-table-column>
@@ -161,7 +161,7 @@ const fetchComplaints = async () => {
       pageNum: currentPage.value,
       pageSize: pageSize.value
     }
-    const data = await request.get('/api/admin/complaints', { params })
+    const data = await request.get('admin/complaints', { params })
     complaintList.value = data.list
     total.value = data.total
   } catch (error) {
@@ -187,7 +187,7 @@ const submitProcess = async () => {
   await processFormRef.value.validate(async (valid) => {
     if (valid) {
       try {
-        await request.put(`/api/complaint/${currentComplaint.value.complaintId}`, processForm)
+        await request.put(`complaint/${currentComplaint.value.complaintId}`, processForm)
         ElMessage.success('处理成功')
         processVisible.value = false
         processFormRef.value.resetFields()

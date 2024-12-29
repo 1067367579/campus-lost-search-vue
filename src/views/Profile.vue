@@ -165,7 +165,7 @@ onMounted(async () => {
 
 const fetchUserInfo = async () => {
   try {
-    const data = await request.get('/api/user/info')
+    const data = await request.get('user/info')
     Object.assign(form, data)
   } catch (error) {
     ElMessage.error('获取用户信息失败')
@@ -179,7 +179,7 @@ const handleSubmit = async () => {
     if (valid) {
       try {
         const { phone, email } = form
-        await request.put('/api/user/info', { phone, email })
+        await request.put('user/info', { phone, email })
         ElMessage.success('保存成功')
         userStore.updateUserInfo({ phone, email })
       } catch (error) {
@@ -195,7 +195,7 @@ const handlePasswordSubmit = async () => {
   await passwordFormRef.value.validate(async (valid) => {
     if (valid) {
       try {
-        await request.put('/api/user/password', {
+        await request.put('user/password', {
           oldPassword: passwordForm.oldPassword,
           newPassword: passwordForm.newPassword
         })

@@ -149,7 +149,7 @@ const fetchPendingStats = async () => {
 // 获取黑名单用户数量
 const fetchBlacklistCount = async () => {
   try {
-    const data = await request.get('/api/admin/blacklist/count')
+    const data = await request.get('admin/blacklist/count')
     blacklistCount.value = data
   } catch (error) {
     console.error('获取黑名单统计失败:', error)
@@ -164,7 +164,7 @@ const fetchRecentLogs = async () => {
       pageNum: 1,
       pageSize: 5
     }
-    const data = await request.get('/api/admin/operation-logs', { params })
+    const data = await request.get('admin/operation-logs', { params })
     recentLogs.value = data.list
   } catch (error) {
     console.error('获取操作日志失败:', error)

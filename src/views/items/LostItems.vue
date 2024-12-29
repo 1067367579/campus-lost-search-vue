@@ -202,7 +202,7 @@ const fetchItems = async () => {
       pageNum: currentPage.value,
       pageSize: pageSize.value
     }
-    const data = await request.get('/api/lost-item/list', { params })
+    const data = await request.get('lost-item/list', { params })
     itemList.value = data.list
     total.value = data.total
   } catch (error) {
