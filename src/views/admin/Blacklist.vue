@@ -5,7 +5,7 @@
         <div class="header">
           <h3>黑名单管理</h3>
           <el-radio-group v-model="searchForm.type" @change="handleSearch">
-            <el-radio-button :label="">全部</el-radio-button>
+            <el-radio-button :label="null">全部</el-radio-button>
             <el-radio-button :label="0">冒领</el-radio-button>
             <el-radio-button :label="1">多次违规</el-radio-button>
           </el-radio-group>

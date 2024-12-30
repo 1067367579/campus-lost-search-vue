@@ -33,11 +33,10 @@ request.interceptors.response.use(
   response => {
     const { code, msg, data } = response.data
     
-    if (code === 1) {  // 成功响应的 code 为 1
+    if (code === 1) {
       return data
     }
     
-    // code 为 0 时表示请求失败，显示后端返回的错误信息
     ElMessage.error(msg || '请求失败')
     return Promise.reject(new Error(msg || '请求失败'))
   },

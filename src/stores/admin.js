@@ -7,13 +7,12 @@ export const useAdminStore = defineStore('admin', () => {
     pendingComplaints: 0,
     pendingClaims: 0
   })
-  
-  const operationLogs = ref([])
 
   const fetchPendingStats = async () => {
     try {
       const data = await request.get('admin/pending-stats')
       pendingStats.value = data
+      return data
     } catch (error) {
       console.error('获取待处理事项统计失败:', error)
       throw error
@@ -31,7 +30,6 @@ export const useAdminStore = defineStore('admin', () => {
 
   return {
     pendingStats,
-    operationLogs,
     fetchPendingStats,
     addToBlacklist
   }

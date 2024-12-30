@@ -5,7 +5,7 @@
         <div class="header">
           <h3>认领申请管理</h3>
           <el-radio-group v-model="searchForm.status" @change="handleSearch">
-            <el-radio-button :label="">全部</el-radio-button>
+            <el-radio-button :label="null">全部</el-radio-button>
             <el-radio-button :label="0">待处理</el-radio-button>
             <el-radio-button :label="1">已通过</el-radio-button>
             <el-radio-button :label="2">已拒绝</el-radio-button>

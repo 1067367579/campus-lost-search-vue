@@ -45,10 +45,12 @@ const loginForm = reactive({
 
 const rules = {
   username: [
-    { required: true, message: '请输入用户名', trigger: 'blur' }
+    { required: true, message: '请输入用户名', trigger: 'blur' },
+    { min: 3, max: 20, message: '用户名长度 3 到 20 个字符', trigger: 'blur' }
   ],
   password: [
-    { required: true, message: '请输入密码', trigger: 'blur' }
+    { required: true, message: '请输入密码', trigger: 'blur' },
+    { min: 6, message: '密码长度不能小于6位', trigger: 'blur' }
   ]
 }
 
@@ -59,14 +61,16 @@ const handleLogin = async () => {
     if (valid) {
       try {
         const data = await request.post('user/login', loginForm)
-        if (data) {
-          userStore.setToken(data.token)
-          userStore.setUserInfo(data)
-          ElMessage.success('登录成功')
+        userStore.setToken(data.token)
+        userStore.setUserInfo(data)
+        ElMessage.success('登录成功')
+        if (data.userType === 1) {
+          await router.push('/admin/dashboard')
+        } else {
           await router.push('/')
         }
       } catch (error) {
-        ElMessage.error(error.response?.data?.message || '登录失败')
+        ElMessage.error(error.message || '登录失败')
       }
     }
   })

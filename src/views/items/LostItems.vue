@@ -20,6 +20,7 @@
                 :key="category.categoryId"
                 :label="category.name"
                 :value="category.categoryId"
+                :disabled="category.status === 0"
               />
             </el-select>
           </el-form-item>
@@ -103,16 +104,25 @@
     <el-dialog
       v-model="detailVisible"
       :title="currentItem?.itemName"
-      width="600px"
+      width="800px"
     >
       <template v-if="currentItem">
         <div class="item-detail">
-          <p><strong>类别：</strong>{{ currentItem.categoryName }}</p>
-          <p><strong>描述：</strong>{{ currentItem.description }}</p>
-          <p><strong>地点：</strong>{{ currentItem.location }}</p>
-          <p><strong>丢失时间：</strong>{{ currentItem.lostTime }}</p>
-          <p><strong>发布者：</strong>{{ currentItem.publisher?.username }}</p>
-          <p><strong>联系方式：</strong>{{ currentItem.publisher?.phone }}</p>
+          <!-- 图片轮播 -->
+          <el-carousel v-if="currentItem.images?.length" height="400px">
+            <el-carousel-item v-for="url in currentItem.images" :key="url">
+              <img :src="url" class="carousel-image" />
+            </el-carousel-item>
+          </el-carousel>
+          
+          <div class="detail-info">
+            <p><strong>类别：</strong>{{ currentItem.categoryName }}</p>
+            <p><strong>描述：</strong>{{ currentItem.description }}</p>
+            <p><strong>地点：</strong>{{ currentItem.location }}</p>
+            <p><strong>丢失时间：</strong>{{ currentItem.lostTime }}</p>
+            <p><strong>发布者：</strong>{{ currentItem.publisher?.username }}</p>
+            <p><strong>联系方式：</strong>{{ currentItem.publisher?.phone }}</p>
+          </div>
         </div>
       </template>
     </el-dialog>
@@ -185,13 +195,21 @@ const claimRules = {
   ]
 }
 
-const { categories } = itemStore
+const categories = ref([])
 
-onMounted(async () => {
-  if (categories.value.length === 0) {
-    await itemStore.fetchCategories()
+// 获取物品类别列表
+const fetchCategories = async () => {
+  try {
+    const data = await request.get('category/list')
+    categories.value = data
+  } catch (error) {
+    ElMessage.error('获取物品类别失败')
   }
-  fetchItems()
+}
+
+onMounted(() => {
+  fetchCategories()
+  handleSearch()  // 获取物品列表
 })
 
 const fetchItems = async () => {
@@ -289,6 +307,20 @@ const submitClaim = async () => {
 }
 
 .item-detail {
+  p {
+    margin: 10px 0;
+  }
+}
+
+.carousel-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.detail-info {
+  margin-top: 20px;
+  
   p {
     margin: 10px 0;
   }

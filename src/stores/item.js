@@ -5,17 +5,6 @@ import request from '@/utils/request'
 export const useItemStore = defineStore('item', () => {
   const lostItems = ref([])
   const foundItems = ref([])
-  const categories = ref([])
-
-  const fetchCategories = async () => {
-    try {
-      const data = await request.get('category/list')
-      categories.value = data
-    } catch (error) {
-      console.error('获取物品类别失败:', error)
-      throw error
-    }
-  }
 
   const publishLostItem = async (itemData) => {
     try {
@@ -40,8 +29,6 @@ export const useItemStore = defineStore('item', () => {
   return {
     lostItems,
     foundItems,
-    categories,
-    fetchCategories,
     publishLostItem,
     publishFoundItem
   }

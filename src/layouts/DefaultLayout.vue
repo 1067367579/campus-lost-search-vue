@@ -8,78 +8,59 @@
       </div>
 
       <el-menu :default-active="activeMenu" class="menu" :router="true" :collapse="isCollapse">
-        <el-menu-item index="/">
-          <el-icon>
-            <House />
-          </el-icon>
-          <template #title>首页</template>
-        </el-menu-item>
+        <!-- 普通用户菜单 -->
+        <template v-if="!userStore.isAdmin">
+          <el-menu-item index="/">
+            <el-icon><House /></el-icon>
+            <template #title>首页</template>
+          </el-menu-item>
 
-        <!-- 物品相关 -->
-        <el-sub-menu index="/items">
-          <template #title>
-            <el-icon>
-              <Box />
-            </el-icon>
-            <span>物品管理</span>
-          </template>
-          <el-menu-item index="/lost-items">丢失物品</el-menu-item>
-          <el-menu-item index="/found-items">拾取物品</el-menu-item>
-          <el-menu-item index="/publish-item">发布物品</el-menu-item>
-        </el-sub-menu>
+          <el-sub-menu index="/items">
+            <template #title>
+              <el-icon><Box /></el-icon>
+              <span>物品管理</span>
+            </template>
+            <el-menu-item index="/lost-items">丢失物品</el-menu-item>
+            <el-menu-item index="/found-items">拾取物品</el-menu-item>
+            <el-menu-item index="/publish-item">发布物品</el-menu-item>
+          </el-sub-menu>
 
-        <!-- 认领相关 -->
-        <el-menu-item index="/my-claims">
-          <el-icon>
-            <Document />
-          </el-icon>
-          <template #title>我的认领</template>
-        </el-menu-item>
+          <el-menu-item index="/my-claims">
+            <el-icon><Document /></el-icon>
+            <template #title>我的认领</template>
+          </el-menu-item>
 
-        <!-- 投诉相关 -->
-        <el-menu-item index="/my-complaints">
-          <el-icon>
-            <Warning />
-          </el-icon>
-          <template #title>我的投诉</template>
-        </el-menu-item>
+          <el-menu-item index="/my-complaints">
+            <el-icon><Warning /></el-icon>
+            <template #title>我的投诉</template>
+          </el-menu-item>
+        </template>
 
         <!-- 管理员菜单 -->
-        <template v-if="userStore.isAdmin">
-          <el-divider>管理员功能</el-divider>
+        <template v-else>
           <el-menu-item index="/admin/dashboard">
-            <el-icon>
-              <DataBoard />
-            </el-icon>
+            <el-icon><DataBoard /></el-icon>
             <template #title>控制台</template>
           </el-menu-item>
 
           <el-menu-item index="/admin/claims">
-            <el-icon>
-              <Document />
-            </el-icon>
+            <el-icon><Document /></el-icon>
             <template #title>认领管理</template>
           </el-menu-item>
 
           <el-menu-item index="/admin/complaints">
-            <el-icon>
-              <Warning />
-            </el-icon>
+            <el-icon><Warning /></el-icon>
             <template #title>投诉管理</template>
           </el-menu-item>
 
           <el-menu-item index="/admin/blacklist">
-            <el-icon>
-              <CircleClose />
-            </el-icon>
+            <el-icon><CircleClose /></el-icon>
             <template #title>黑名单管理</template>
           </el-menu-item>
 
-          <el-menu-item index="/admin/operation-logs">
-            <el-icon>
-              <List />
-            </el-icon>
-            <template #title>操作日志</template>
+          <el-menu-item index="/admin/categories">
+            <el-icon><List /></el-icon>
+            <template #title>类别管理</template>
           </el-menu-item>
         </template>
       </el-menu>
@@ -144,10 +125,10 @@ import {
   Warning,
   DataBoard,
   CircleClose,
-  List,
   CaretBottom,
   Expand,
-  Fold
+  Fold,
+  List
 } from '@element-plus/icons-vue'
 import { ElMessageBox } from 'element-plus'
 
@@ -167,12 +148,12 @@ const breadcrumbs = computed(() => {
     '/found-items': { title: '拾取物品' },
     '/my-claims': { title: '我的认领' },
     '/my-complaints': { title: '我的投诉' },
-    '/profile': { title: '个人资���' },
+    '/profile': { title: '个人资料' },
     '/admin/dashboard': { title: '控制台' },
     '/admin/claims': { title: '认领管理' },
     '/admin/complaints': { title: '投诉管理' },
     '/admin/blacklist': { title: '黑名单管理' },
-    '/admin/operation-logs': { title: '操作日志' }
+    '/admin/categories': { title: '类别管理' }
   }
 
   const paths = route.path.split('/').filter(Boolean)

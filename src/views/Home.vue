@@ -75,54 +75,17 @@
         <el-card>
           <template #header>
             <div class="card-header">
-              <span>最新公告</span>
+              <span>最新物品</span>
             </div>
           </template>
-          <el-empty v-if="announcements.length === 0" description="暂无公告" />
-          <div v-else class="announcements">
-            <div v-for="item in announcements" :key="item.id" class="announcement-item">
-              <span class="title">{{ item.title }}</span>
-              <span class="time">{{ item.createTime }}</span>
-            </div>
-          </div>
-        </el-card>
-      </el-col>
-    </el-row>
-
-    <!-- 最近物品 -->
-    <el-row :gutter="20" style="margin-top: 20px">
-      <el-col :span="12">
-        <el-card>
-          <template #header>
-            <div class="card-header">
-              <span>最新丢失物品</span>
-              <el-button type="text" @click="$router.push('/lost-items')">
-                查看更多
-              </el-button>
-            </div>
-          </template>
-          <el-table :data="recentLostItems" style="width: 100%">
+          <el-table :data="recentItems" style="width: 100%">
             <el-table-column prop="itemName" label="物品名称" />
-            <el-table-column prop="location" label="丢失地点" />
-            <el-table-column prop="lostTime" label="丢失时间" width="180" />
-          </el-table>
-        </el-card>
-      </el-col>
-
-      <el-col :span="12">
-        <el-card>
-          <template #header>
-            <div class="card-header">
-              <span>最新拾取物品</span>
-              <el-button type="text" @click="$router.push('/found-items')">
-                查看更多
-              </el-button>
-            </div>
-          </template>
-          <el-table :data="recentFoundItems" style="width: 100%">
-            <el-table-column prop="itemName" label="物品名称" />
-            <el-table-column prop="location" label="拾取地点" />
-            <el-table-column prop="foundTime" label="拾取时间" width="180" />
+            <el-table-column prop="type" label="类型">
+              <template #default="{ row }">
+                {{ row.type === 0 ? '丢失' : '拾取' }}
+              </template>
+            </el-table-column>
+            <el-table-column prop="createTime" label="发布时间" width="180" />
           </el-table>
         </el-card>
       </el-col>
@@ -132,7 +95,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { Search, Box, Check } from '@element-plus/icons-vue'
+import { Search, Box, Document, Check } from '@element-plus/icons-vue'
 import request from '@/utils/request'
 
 const stats = ref({
@@ -141,63 +104,28 @@ const stats = ref({
   claimedItems: 0
 })
 
-const announcements = ref([])
-const recentLostItems = ref([])
-const recentFoundItems = ref([])
+const recentItems = ref([])
 
 onMounted(async () => {
-  try {
-    await Promise.allSettled([
-      fetchStats(),
-      fetchAnnouncements(),
-      fetchRecentItems()
-    ])
-  } catch (error) {
-    console.error('初始化数据失败:', error)
-  }
+  await Promise.all([
+    fetchStats(),
+    fetchRecentItems()
+  ])
 })
 
 const fetchStats = async () => {
   try {
     const data = await request.get('stats')
-    if (data) {
-      stats.value = data
-    }
+    stats.value = data
   } catch (error) {
     console.error('获取统计数据失败:', error)
   }
 }
 
-const fetchAnnouncements = async () => {
-  try {
-    const data = await request.get('announcement/list', {
-      params: { pageSize: 5 }
-    })
-    if (data?.list) {
-      announcements.value = data.list
-    }
-  } catch (error) {
-    console.error('获取公告失败:', error)
-  }
-}
-
 const fetchRecentItems = async () => {
   try {
-    const [lostData, foundData] = await Promise.all([
-      request.get('lost-item/list', {
-        params: { pageSize: 5 }
-      }),
-      request.get('found-item/list', {
-        params: { pageSize: 5 }
-      })
-    ])
-    
-    if (lostData?.list) {
-      recentLostItems.value = lostData.list
-    }
-    if (foundData?.list) {
-      recentFoundItems.value = foundData.list
-    }
+    const data = await request.get('recent-items')
+    recentItems.value = data
   } catch (error) {
     console.error('获取最近物品失败:', error)
   }
@@ -267,29 +195,5 @@ const fetchRecentItems = async () => {
 .quick-actions {
   display: flex;
   gap: 16px;
-}
-
-.announcements {
-  .announcement-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid #ebeef5;
-
-    &:last-child {
-      border-bottom: none;
-    }
-
-    .title {
-      flex: 1;
-      margin-right: 20px;
-    }
-
-    .time {
-      color: #909399;
-      font-size: 14px;
-    }
-  }
 }
 </style> 

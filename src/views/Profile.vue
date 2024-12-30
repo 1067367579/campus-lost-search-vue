@@ -7,13 +7,7 @@
         </div>
       </template>
 
-      <el-form
-        ref="formRef"
-        :model="form"
-        :rules="rules"
-        label-width="100px"
-        class="profile-form"
-      >
+      <el-form ref="formRef" :model="form" :rules="rules" label-width="100px" class="profile-form">
         <el-form-item label="用户名">
           <el-input v-model="form.username" disabled />
         </el-form-item>
@@ -50,35 +44,18 @@
         </div>
       </template>
 
-      <el-form
-        ref="passwordFormRef"
-        :model="passwordForm"
-        :rules="passwordRules"
-        label-width="100px"
-        class="password-form"
-      >
+      <el-form ref="passwordFormRef" :model="passwordForm" :rules="passwordRules" label-width="100px"
+        class="password-form">
         <el-form-item label="原密码" prop="oldPassword">
-          <el-input
-            v-model="passwordForm.oldPassword"
-            type="password"
-            show-password
-          />
+          <el-input v-model="passwordForm.oldPassword" type="password" show-password />
         </el-form-item>
 
         <el-form-item label="新密码" prop="newPassword">
-          <el-input
-            v-model="passwordForm.newPassword"
-            type="password"
-            show-password
-          />
+          <el-input v-model="passwordForm.newPassword" type="password" show-password />
         </el-form-item>
 
         <el-form-item label="确认密码" prop="confirmPassword">
-          <el-input
-            v-model="passwordForm.confirmPassword"
-            type="password"
-            show-password
-          />
+          <el-input v-model="passwordForm.confirmPassword" type="password" show-password />
         </el-form-item>
 
         <el-form-item>
@@ -96,10 +73,12 @@ import { ref, reactive, onMounted } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { ElMessage } from 'element-plus'
 import request from '@/utils/request'
+import { useRouter } from 'vue-router'
 
 const userStore = useUserStore()
 const formRef = ref(null)
 const passwordFormRef = ref(null)
+const router = useRouter();
 
 const form = reactive({
   username: '',
@@ -148,7 +127,8 @@ const validatePass2 = (rule, value, callback) => {
 
 const passwordRules = {
   oldPassword: [
-    { required: true, message: '请输入原密码', trigger: 'blur' }
+    { required: true, message: '请输入原密码', trigger: 'blur' },
+    { min: 6, message: '密码长度不能小于6位', trigger: 'blur' }
   ],
   newPassword: [
     { validator: validatePass, trigger: 'blur' },
@@ -174,7 +154,7 @@ const fetchUserInfo = async () => {
 
 const handleSubmit = async () => {
   if (!formRef.value) return
-  
+
   await formRef.value.validate(async (valid) => {
     if (valid) {
       try {
@@ -191,7 +171,7 @@ const handleSubmit = async () => {
 
 const handlePasswordSubmit = async () => {
   if (!passwordFormRef.value) return
-  
+
   await passwordFormRef.value.validate(async (valid) => {
     if (valid) {
       try {
@@ -203,6 +183,7 @@ const handlePasswordSubmit = async () => {
         userStore.logout()
         router.push('/login')
       } catch (error) {
+        console.log(error.message)
         ElMessage.error(error.message || '密码修改失败')
       }
     }
@@ -227,4 +208,4 @@ const handlePasswordSubmit = async () => {
   max-width: 500px;
   margin: 0 auto;
 }
-</style> 
+</style>

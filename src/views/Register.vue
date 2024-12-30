@@ -4,45 +4,32 @@
       <template #header>
         <h2>注册</h2>
       </template>
-      
-      <el-form
-        ref="registerFormRef"
-        :model="registerForm"
-        :rules="rules"
-        label-width="100px"
-      >
+
+      <el-form ref="registerFormRef" :model="registerForm" :rules="rules" label-width="100px">
         <el-form-item label="用户名" prop="username">
           <el-input v-model="registerForm.username" />
         </el-form-item>
-        
+
         <el-form-item label="密码" prop="password">
-          <el-input
-            v-model="registerForm.password"
-            type="password"
-            show-password
-          />
+          <el-input v-model="registerForm.password" type="password" show-password />
         </el-form-item>
-        
+
         <el-form-item label="确认密码" prop="confirmPassword">
-          <el-input
-            v-model="registerForm.confirmPassword"
-            type="password"
-            show-password
-          />
+          <el-input v-model="registerForm.confirmPassword" type="password" show-password />
         </el-form-item>
-        
-        <el-form-item label="证件号" prop="idNumber">
+
+        <el-form-item label="学号" prop="idNumber">
           <el-input v-model="registerForm.idNumber" />
         </el-form-item>
-        
+
         <el-form-item label="手机号" prop="phone">
           <el-input v-model="registerForm.phone" />
         </el-form-item>
-        
+
         <el-form-item label="邮箱" prop="email">
           <el-input v-model="registerForm.email" />
         </el-form-item>
-        
+
         <el-form-item>
           <el-button type="primary" @click="handleRegister">注册</el-button>
           <el-button @click="$router.push('/login')">返回登录</el-button>
@@ -105,8 +92,8 @@ const rules = {
     { validator: validatePass2, trigger: 'blur' }
   ],
   idNumber: [
-    { required: true, message: '请输入证件号', trigger: 'blur' },
-    { pattern: /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/, message: '证件号格式不正确', trigger: 'blur' }
+    { required: true, message: '请输入学号', trigger: 'blur' },
+    { pattern: /(^\d{10}$)/, message: '学号格式不正确', trigger: 'blur' }
   ],
   phone: [
     { required: true, message: '请输入手机号', trigger: 'blur' },
@@ -120,19 +107,17 @@ const rules = {
 
 const handleRegister = async () => {
   if (!registerFormRef.value) return
-  
+
   await registerFormRef.value.validate(async (valid) => {
     if (valid) {
       try {
         const { confirmPassword, ...registerData } = registerForm
-        const data = await request.post('user/register', registerData)
-        if (data) {
-          ElMessage.success('注册成功，请登录')
-          localStorage.removeItem('registerForm')
-          await router.push('/login')
-        }
+        await request.post('user/register', registerData)
+        ElMessage.success('注册成功，请登录')
+        localStorage.removeItem('registerForm')
+        await router.push('/login')
       } catch (error) {
-        ElMessage.error(error.response?.data?.message || '注册失败')
+        ElMessage.error(error.message || '注册失败')
       }
     }
   })
@@ -173,4 +158,4 @@ onMounted(() => {
 .register-card {
   width: 500px;
 }
-</style> 
+</style>
