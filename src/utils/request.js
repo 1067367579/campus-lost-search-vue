@@ -2,6 +2,7 @@ import axios from 'axios'
 import { useUserStore } from '@/stores/user'
 import { ElMessage } from 'element-plus'
 import router from '@/router'
+import dayjs from 'dayjs'
 
 const request = axios.create({
   baseURL: '/api',
@@ -19,6 +20,18 @@ request.interceptors.request.use(
     // 确保 url 正确
     if (!config.url.startsWith('/')) {
       config.url = '/' + config.url
+    }
+    
+    // 处理请求数据中的时间格式
+    if (config.data && (config.data.lostTime || config.data.foundTime)) {
+      const data = { ...config.data }
+      if (data.lostTime) {
+        data.lostTime = dayjs(data.lostTime).toISOString()
+      }
+      if (data.foundTime) {
+        data.foundTime = dayjs(data.foundTime).toISOString()
+      }
+      config.data = data
     }
     
     return config

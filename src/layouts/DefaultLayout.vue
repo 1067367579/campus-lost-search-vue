@@ -34,6 +34,11 @@
             <el-icon><Warning /></el-icon>
             <template #title>我的投诉</template>
           </el-menu-item>
+
+          <el-menu-item index="/my-items">
+            <el-icon><Document /></el-icon>
+            <span>我的物品</span>
+          </el-menu-item>
         </template>
 
         <!-- 管理员菜单 -->

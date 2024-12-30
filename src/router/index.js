@@ -63,6 +63,12 @@ const router = createRouter({
           component: () => import('@/views/complaints/MyComplaints.vue'),
           meta: { requiresAuth: true }
         },
+        {
+          path: '/my-items',
+          name: 'MyItems',
+          component: () => import('@/views/items/MyItems.vue'),
+          meta: { requiresAuth: true }
+        },
         // 管理员路由
         {
           path: 'admin/dashboard',
@@ -93,6 +99,18 @@ const router = createRouter({
           name: 'AdminCategories',
           component: () => import('@/views/admin/Categories.vue'),
           meta: { requiresAuth: true, requiresAdmin: true }
+        },
+        {
+          path: '/edit-item/:id',
+          name: 'EditItem',
+          component: () => import('@/views/items/EditItem.vue'),
+          meta: {
+            requiresAuth: true
+          },
+          props: route => ({
+            itemId: Number(route.params.id),
+            itemType: Number(route.query.type)  // 0: 丢失物品, 1: 拾取物品
+          })
         }
       ]
     },

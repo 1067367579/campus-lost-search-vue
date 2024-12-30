@@ -14,26 +14,18 @@
       <div class="search-bar">
         <el-form :inline="true" :model="searchForm">
           <el-form-item label="物品类别">
-            <el-select v-model="searchForm.categoryId" placeholder="全部类别" clearable>
-              <el-option
-                v-for="category in categories"
-                :key="category.categoryId"
-                :label="category.name"
-                :value="category.categoryId"
-              />
+            <el-select v-model="searchForm.categoryId" placeholder="全部类别" style="width: 200px" clearable>
+              <el-option v-for="category in categories" :key="category.categoryId" :label="category.name"
+                :value="category.categoryId" :disabled="category.status === 0" />
             </el-select>
           </el-form-item>
 
           <el-form-item label="关键词">
-            <el-input
-              v-model="searchForm.keyword"
-              placeholder="搜索物品名称、描述"
-              clearable
-            />
+            <el-input v-model="searchForm.keyword" placeholder="搜索物品名称、描述" clearable />
           </el-form-item>
 
           <el-form-item label="状态">
-            <el-select v-model="searchForm.status" placeholder="全部状态" clearable>
+            <el-select v-model="searchForm.status" placeholder="全部状态" style="width: 200px" clearable>
               <el-option label="未认领" :value="0" />
               <el-option label="已认领" :value="1" />
             </el-select>
@@ -47,13 +39,16 @@
       </div>
 
       <!-- 物品列表 -->
-      <el-table
-        v-loading="loading"
-        :data="itemList"
-        style="width: 100%"
-      >
+      <el-table v-loading="loading" :data="itemList" style="width: 100%">
         <el-table-column prop="itemName" label="物品名称" min-width="120" />
         <el-table-column prop="categoryName" label="类别" width="120" />
+        <el-table-column label="图片" width="100">
+          <template #default="{ row }">
+            <el-image v-if="row.images && row.images.length > 0" :src="row.images[0]" :preview-src-list="row.images"
+              fit="cover" style="width: 50px; height: 50px; cursor: pointer" />
+            <span v-else>无图片</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="description" label="描述" min-width="200" show-overflow-tooltip />
         <el-table-column prop="location" label="拾取地点" min-width="150" />
         <el-table-column prop="foundTime" label="拾取时间" width="180" />
@@ -64,21 +59,25 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="150" fixed="right">
+        <el-table-column label="操作" width="200" fixed="right">
           <template #default="{ row }">
-            <el-button
-              v-if="row.status === 0"
-              type="primary"
-              link
+            <el-button 
+              v-if="row.username === userStore.userInfo?.username"
+              type="primary" 
+              link 
+              @click="handleEdit(row)"
+            >
+              编辑
+            </el-button>
+            <el-button 
+              v-if="row.status === 0" 
+              type="primary" 
+              link 
               @click="handleClaim(row)"
             >
               申请认领
             </el-button>
-            <el-button
-              type="primary"
-              link
-              @click="showDetail(row)"
-            >
+            <el-button type="primary" link @click="showDetail(row)">
               查看详情
             </el-button>
           </template>
@@ -87,58 +86,45 @@
 
       <!-- 分页 -->
       <div class="pagination">
-        <el-pagination
-          v-model:current-page="currentPage"
-          v-model:page-size="pageSize"
-          :total="total"
-          :page-sizes="[10, 20, 50, 100]"
-          layout="total, sizes, prev, pager, next"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-        />
+        <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :total="total"
+          :page-sizes="[10, 20, 50, 100]" layout="total, sizes, prev, pager, next" @size-change="handleSizeChange"
+          @current-change="handleCurrentChange" />
       </div>
     </el-card>
 
     <!-- 物品详情对话框 -->
-    <el-dialog
-      v-model="detailVisible"
-      :title="currentItem?.itemName"
-      width="600px"
-    >
+    <el-dialog v-model="detailVisible" :title="currentItem?.itemName" width="800px">
       <template v-if="currentItem">
         <div class="item-detail">
-          <p><strong>类别：</strong>{{ currentItem.categoryName }}</p>
-          <p><strong>描述：</strong>{{ currentItem.description }}</p>
-          <p><strong>地点：</strong>{{ currentItem.location }}</p>
-          <p><strong>拾取时间：</strong>{{ currentItem.foundTime }}</p>
-          <p><strong>发布者：</strong>{{ currentItem.publisher?.username }}</p>
-          <p><strong>联系方式：</strong>{{ currentItem.publisher?.phone }}</p>
+          <!-- 图片轮播 -->
+          <el-carousel v-if="currentItem.images?.length" height="400px" indicator-position="outside">
+            <el-carousel-item v-for="url in currentItem.images" :key="url">
+              <el-image :src="url" fit="contain" style="width: 100%; height: 100%"
+                :preview-src-list="currentItem.images" />
+            </el-carousel-item>
+          </el-carousel>
+
+          <div class="detail-info">
+            <p><strong>类别：</strong>{{ currentItem.categoryName }}</p>
+            <p><strong>描述：</strong>{{ currentItem.description }}</p>
+            <p><strong>地点：</strong>{{ currentItem.location }}</p>
+            <p><strong>拾取时间：</strong>{{ currentItem.foundTime }}</p>
+            <p><strong>发布者：</strong>{{ currentItem.username }}</p>
+            <p><strong>联系手机号：</strong>{{ currentItem.phone }}</p>
+            <p><strong>联系邮箱：</strong>{{ currentItem.email }}</p>
+          </div>
         </div>
       </template>
     </el-dialog>
 
     <!-- 认领申请对话框 -->
-    <el-dialog
-      v-model="claimVisible"
-      title="申请认领"
-      width="500px"
-    >
-      <el-form
-        ref="claimFormRef"
-        :model="claimForm"
-        :rules="claimRules"
-        label-width="80px"
-      >
+    <el-dialog v-model="claimVisible" title="申请认领" width="500px">
+      <el-form ref="claimFormRef" :model="claimForm" :rules="claimRules" label-width="80px">
         <el-form-item label="认领说明" prop="description">
-          <el-input
-            v-model="claimForm.description"
-            type="textarea"
-            :rows="4"
-            placeholder="请详细描述物品特征，以及能证明是您的物品的信息"
-          />
+          <el-input v-model="claimForm.description" type="textarea" :rows="4" placeholder="请详细描述物品特征，以及能证明是您的物品的信息" />
         </el-form-item>
       </el-form>
-      
+
       <template #footer>
         <el-button @click="claimVisible = false">取消</el-button>
         <el-button type="primary" @click="submitClaim">提交</el-button>
@@ -149,13 +135,17 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useItemStore } from '@/stores/item'
 import { useClaimStore } from '@/stores/claim'
+import { useUserStore } from '@/stores/user'
 import { ElMessage } from 'element-plus'
 import request from '@/utils/request'
 
+const router = useRouter()
 const itemStore = useItemStore()
 const claimStore = useClaimStore()
+const userStore = useUserStore()
 const loading = ref(false)
 const currentPage = ref(1)
 const pageSize = ref(10)
@@ -169,7 +159,7 @@ const claimFormRef = ref(null)
 const searchForm = reactive({
   categoryId: '',
   keyword: '',
-  status: '',
+  status: 0,
   pageNum: 1,
   pageSize: 10
 })
@@ -185,12 +175,19 @@ const claimRules = {
   ]
 }
 
-const { categories } = itemStore
+const categories = ref([])
 
-onMounted(async () => {
-  if (categories.value.length === 0) {
-    await itemStore.fetchCategories()
+const fetchCategories = async () => {
+  try {
+    const data = await request.get('category/list')
+    categories.value = data
+  } catch (error) {
+    ElMessage.error('获取物品类别失败')
   }
+}
+
+onMounted(() => {
+  fetchCategories()
   fetchItems()
 })
 
@@ -202,8 +199,8 @@ const fetchItems = async () => {
       pageNum: currentPage.value,
       pageSize: pageSize.value
     }
-    const data = await request.get('/api/found-item/list', { params })
-    itemList.value = data.list
+    const data = await request.get('found-item/list', { params })
+    itemList.value = data.records
     total.value = data.total
   } catch (error) {
     ElMessage.error('获取物品列表失败')
@@ -248,13 +245,13 @@ const handleClaim = (row) => {
 
 const submitClaim = async () => {
   if (!claimFormRef.value) return
-  
+
   await claimFormRef.value.validate(async (valid) => {
     if (valid) {
       try {
         await claimStore.submitClaim({
           itemId: currentItem.value.itemId,
-          itemType: 1, // 1表示拾取物品
+          itemType: 1,
           description: claimForm.description
         })
         ElMessage.success('申请提交成功')
@@ -265,6 +262,10 @@ const submitClaim = async () => {
       }
     }
   })
+}
+
+const handleEdit = (row) => {
+  router.push(`/edit-item/${row.itemId}?type=1`)
 }
 </script>
 
@@ -289,6 +290,32 @@ const submitClaim = async () => {
 }
 
 .item-detail {
+  p {
+    margin: 10px 0;
+  }
+}
+
+.carousel-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.el-carousel {
+  margin-bottom: 20px;
+}
+
+:deep(.el-carousel__indicators) {
+  transform: translateY(20px);
+}
+
+:deep(.el-image-viewer__wrapper) {
+  z-index: 2050;
+}
+
+.detail-info {
+  margin-top: 20px;
+
   p {
     margin: 10px 0;
   }

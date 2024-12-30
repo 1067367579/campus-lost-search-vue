@@ -36,5 +36,11 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api/, '')
       }
     }
+  },
+  define: {
+    'process.env': {
+      // 配置 Element Plus 的时间格式
+      ELEMENT_PLUS_DATE_FORMAT: JSON.stringify('YYYY-MM-DD HH:mm:ss')
+    }
   }
 })

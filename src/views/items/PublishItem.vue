@@ -13,7 +13,7 @@
           <el-input v-model="formData.itemName" placeholder="请输入物品名称" />
         </el-form-item>
 
-        <el-form-item label="物品类别" prop="categoryId">
+        <el-form-item label="物品类别" prop="categoryId" :error="isCustomCategory ? '' : undefined">
           <div v-if="!isCustomCategory">
             <el-select 
               v-model="formData.categoryId" 
@@ -62,7 +62,7 @@
             action="#"
             :http-request="handleUpload"
             list-type="picture-card"
-            :limit="3"
+            :limit="6"
             :before-upload="beforeUpload"
             :on-success="handleUploadSuccess"
             :on-error="handleUploadError"
@@ -71,7 +71,7 @@
             <el-icon><Plus /></el-icon>
             <template #tip>
               <div class="el-upload__tip">
-                支持 jpg/png 格式图片，单张不超过 5MB，最多上传 3 张
+                支持 jpg/png 格式图片，单张不超过 5MB，最多上传 6 张
               </div>
             </template>
           </el-upload>
@@ -93,6 +93,7 @@ import { useItemStore } from '@/stores/item'
 import { ElMessage } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import request from '@/utils/request'
+import dayjs from 'dayjs'
 
 const router = useRouter()
 const itemStore = useItemStore()
@@ -101,7 +102,7 @@ const isLost = ref(true)
 
 const formData = reactive({
   itemName: '',
-  categoryId: undefined,
+  categoryId: null,
   description: '',
   location: '',
   time: '',
@@ -126,6 +127,7 @@ const fetchCategories = async () => {
   try {
     const data = await request.get('category/list')
     categories.value = data
+    console.log('类别列表:', data)
   } catch (error) {
     ElMessage.error('获取物品类别失败')
   }
@@ -133,9 +135,14 @@ const fetchCategories = async () => {
 
 // 监听类别选择
 watch(() => formData.categoryId, (newVal) => {
+  console.log('选择的类别ID:', newVal, typeof newVal)
   if (newVal === 'custom') {
     isCustomCategory.value = true
-    formData.categoryId = undefined
+    formData.categoryId = null
+  } else if (newVal) {  // 当有有效的类别ID时，触发验证
+    if (formRef.value) {
+      formRef.value.validateField('categoryId')
+    }
   }
 })
 
@@ -153,14 +160,20 @@ const handleAddCategory = async () => {
     })
     
     // 添加到类别列表
-    categories.value.push({
+    const newCategory = {
       categoryId: data.categoryId,
       name: newCategoryName.value,
       status: 1
-    })
+    }
+    categories.value.push(newCategory)
     
     // 选中新添加的类别
-    formData.categoryId = data.categoryId
+    formData.categoryId = newCategory.categoryId
+    
+    // 手动触发表单验证
+    if (formRef.value) {
+      formRef.value.validateField('categoryId')
+    }
     
     ElMessage.success('添加类别成功')
     isCustomCategory.value = false
@@ -234,7 +247,18 @@ const rules = {
     { min: 2, max: 50, message: '长度在 2 到 50 个字符', trigger: 'blur' }
   ],
   categoryId: [
-    { required: true, message: '请选择或添加物品类别', trigger: 'change' }
+    { 
+      required: true, 
+      message: '请选择或添加物品类别', 
+      trigger: 'change',
+      validator: (rule, value, callback) => {
+        if (!value && !isCustomCategory.value) {  // 只在非自定义类别模式下验证
+          callback(new Error('请选择或添加物品类别'))
+        } else {
+          callback()
+        }
+      }
+    }
   ],
   description: [
     { required: true, message: '请输入详细描述', trigger: 'blur' },
@@ -272,11 +296,17 @@ const handleSubmit = async () => {
   await formRef.value.validate(async (valid) => {
     if (valid) {
       try {
+        // 准备提交的数据
         const submitData = {
-          ...formData,
-          [isLost.value ? 'lostTime' : 'foundTime']: formData.time
+          itemName: formData.itemName,
+          categoryId: formData.categoryId,
+          description: formData.description,
+          location: formData.location,
+          images: formData.images,
+          [isLost.value ? 'lostTime' : 'foundTime']: dayjs(formData.time).toISOString()
         }
-        delete submitData.time
+
+        console.log('提交的数据:', submitData)
 
         if (isLost.value) {
           await itemStore.publishLostItem(submitData)
