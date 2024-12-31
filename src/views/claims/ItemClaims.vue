@@ -114,6 +114,48 @@
         <el-button type="primary" @click="submitComplaint">提交</el-button>
       </template>
     </el-dialog>
+
+    <!-- 详情对话框 -->
+    <el-dialog v-model="detailVisible" title="申请详情" width="600px">
+      <template v-if="currentClaim">
+        <el-descriptions :column="2" border>
+          <el-descriptions-item label="申请人">{{ currentClaim.username }}</el-descriptions-item>
+          <el-descriptions-item label="申请类型">
+            <el-tag :type="currentClaim.claimType === 'claim' ? 'primary' : 'success'">
+              {{ currentClaim.claimType === 'claim' ? '认领申请' : '还回申请' }}
+            </el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="申请时间">{{ currentClaim.createTime }}</el-descriptions-item>
+          <el-descriptions-item label="状态">
+            <el-tag :type="getStatusType(currentClaim.status)">
+              {{ getStatusText(currentClaim.status) }}
+            </el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="处理时间" v-if="currentClaim.handleTime">
+            {{ currentClaim.handleTime }}
+          </el-descriptions-item>
+          <el-descriptions-item label="处理备注" v-if="currentClaim.handleRemark">
+            {{ currentClaim.handleRemark }}
+          </el-descriptions-item>
+        </el-descriptions>
+
+        <div class="detail-section">
+          <h4>申请说明</h4>
+          <p>{{ currentClaim.description }}</p>
+        </div>
+
+        <!-- 证明材料 -->
+        <div class="detail-section" v-if="currentClaim.evidence">
+          <h4>证明材料</h4>
+          <el-image
+            :src="currentClaim.evidence"
+            :preview-src-list="[currentClaim.evidence]"
+            fit="contain"
+            style="max-width: 100%; max-height: 400px;"
+          />
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 

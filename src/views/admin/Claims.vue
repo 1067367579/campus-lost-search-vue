@@ -54,34 +54,34 @@
           </template>
         </el-table-column>
         
-        <el-table-column label="操作" width="280" fixed="right">
+        <el-table-column label="操作" width="250" fixed="right">
           <template #default="{ row }">
-            <el-button type="primary" link @click="showDetail(row)">
-              查看详情
-            </el-button>
-            <el-button
-              v-if="row.status === 0"
-              type="success"
-              link
+            <el-button 
+              v-if="row.status === 0" 
+              type="success" 
+              link 
               @click="handleProcess(row, 1)"
             >
               通过
             </el-button>
-            <el-button
-              v-if="row.status === 0"
-              type="danger"
-              link
+            <el-button 
+              v-if="row.status === 0" 
+              type="danger" 
+              link 
               @click="handleProcess(row, 2)"
             >
               拒绝
             </el-button>
-            <el-button
-              v-if="row.status === 1"
-              type="warning"
-              link
-              @click="handleBlacklist(row)"
+            <el-button 
+              v-if="row.status !== 0" 
+              type="warning" 
+              link 
+              @click="handleRevoke(row)"
             >
-              加入黑名单
+              撤销处理
+            </el-button>
+            <el-button type="primary" link @click="showDetail(row)">
+              查看详情
             </el-button>
           </template>
         </el-table-column>
@@ -100,46 +100,6 @@
         />
       </div>
     </el-card>
-
-    <!-- 处理对话框 -->
-    <el-dialog v-model="processVisible" :title="processTitle" width="500px">
-      <el-form ref="processFormRef" :model="processForm" :rules="processRules" label-width="80px">
-        <el-form-item label="处理备注" prop="remark">
-          <el-input
-            v-model="processForm.remark"
-            type="textarea"
-            :rows="4"
-            :placeholder="processForm.status === 1 ? '请输入通过原因' : '请输入拒绝原因'"
-          />
-        </el-form-item>
-      </el-form>
-      
-      <template #footer>
-        <el-button @click="processVisible = false">取消</el-button>
-        <el-button :type="processForm.status === 1 ? 'success' : 'danger'" @click="submitProcess">
-          确定{{ processForm.status === 1 ? '通过' : '拒绝' }}
-        </el-button>
-      </template>
-    </el-dialog>
-
-    <!-- 加入黑名单对话框 -->
-    <el-dialog v-model="blacklistVisible" title="加入黑名单" width="500px">
-      <el-form ref="blacklistFormRef" :model="blacklistForm" :rules="blacklistRules" label-width="80px">
-        <el-form-item label="原因" prop="reason">
-          <el-input
-            v-model="blacklistForm.reason"
-            type="textarea"
-            :rows="4"
-            placeholder="请输入加入黑名单的原因"
-          />
-        </el-form-item>
-      </el-form>
-      
-      <template #footer>
-        <el-button @click="blacklistVisible = false">取消</el-button>
-        <el-button type="danger" @click="submitBlacklist">确定</el-button>
-      </template>
-    </el-dialog>
 
     <!-- 申请详情对话框 -->
     <el-dialog v-model="detailVisible" title="申请详情" width="800px">
@@ -212,6 +172,46 @@
         </div>
       </template>
     </el-dialog>
+
+    <!-- 处理对话框 -->
+    <el-dialog v-model="processVisible" :title="processForm.status === 1 ? '通过申请' : '拒绝申请'" width="500px">
+      <el-form ref="processFormRef" :model="processForm" :rules="processRules" label-width="80px">
+        <el-form-item label="处理备注" prop="remark">
+          <el-input
+            v-model="processForm.remark"
+            type="textarea"
+            :rows="4"
+            :placeholder="processForm.status === 1 ? '请输入通过原因' : '请输入拒绝原因'"
+          />
+        </el-form-item>
+      </el-form>
+      
+      <template #footer>
+        <el-button @click="processVisible = false">取消</el-button>
+        <el-button :type="processForm.status === 1 ? 'success' : 'danger'" @click="submitProcess">
+          确定
+        </el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 加入黑名单对话框 -->
+    <el-dialog v-model="blacklistVisible" title="加入黑名单" width="500px">
+      <el-form ref="blacklistFormRef" :model="blacklistForm" :rules="blacklistRules" label-width="80px">
+        <el-form-item label="原因" prop="reason">
+          <el-input
+            v-model="blacklistForm.reason"
+            type="textarea"
+            :rows="4"
+            placeholder="请输入加入黑名单的原因"
+          />
+        </el-form-item>
+      </el-form>
+      
+      <template #footer>
+        <el-button @click="blacklistVisible = false">取消</el-button>
+        <el-button type="danger" @click="submitBlacklist">确定</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -243,6 +243,20 @@ const processForm = reactive({
 const processRules = {
   remark: [
     { required: true, message: '请输入处理备注', trigger: 'blur' },
+    { min: 2, max: 200, message: '长度在 2 到 200 个字符', trigger: 'blur' }
+  ]
+}
+
+// 黑名单对话框相关
+const blacklistVisible = ref(false)
+const blacklistFormRef = ref(null)
+const blacklistForm = reactive({
+  reason: ''
+})
+
+const blacklistRules = {
+  reason: [
+    { required: true, message: '请输入加入黑名单的原因', trigger: 'blur' },
     { min: 2, max: 200, message: '长度在 2 到 200 个字符', trigger: 'blur' }
   ]
 }
@@ -330,6 +344,35 @@ const submitProcess = async () => {
   })
 }
 
+// 加入黑名单
+const handleBlacklist = (row) => {
+  blacklistForm.reason = ''
+  currentClaim.value = row
+  blacklistVisible.value = true
+}
+
+// 提交黑名单
+const submitBlacklist = async () => {
+  if (!blacklistFormRef.value) return
+  
+  await blacklistFormRef.value.validate(async (valid) => {
+    if (valid) {
+      try {
+        await request.post('admin/blacklist', {
+          userId: currentClaim.value.userId,
+          reason: blacklistForm.reason,
+          type: 0  // 冒领类型
+        })
+        ElMessage.success('已将用户加入黑名单')
+        blacklistVisible.value = false
+        fetchClaims()
+      } catch (error) {
+        ElMessage.error(error.message || '操作失败')
+      }
+    }
+  })
+}
+
 // 状态显示相关
 const getStatusType = (status) => {
   switch (status) {
@@ -366,6 +409,32 @@ const handleSearch = () => {
   fetchClaims()
 }
 
+// 添加撤销处理函数
+const handleRevoke = async (row) => {
+  try {
+    await ElMessageBox.confirm(
+      '确定要撤销该认领申请的处理结果吗？',
+      '提示',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+    
+    await request.put(`/admin/claims/${row.claimId}/status`,{
+          status: 0,
+          remark: ''
+        })
+    ElMessage.success('撤销成功')
+    fetchClaims()
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('撤销失败')
+    }
+  }
+}
+
 onMounted(() => {
   fetchClaims()
 })
@@ -390,5 +459,31 @@ onMounted(() => {
 .pagination {
   margin-top: 20px;
   text-align: right;
+}
+
+.detail-section {
+  margin-top: 20px;
+
+  h4 {
+    margin-bottom: 10px;
+    color: #606266;
+    font-weight: bold;
+  }
+
+  p {
+    color: #666;
+    line-height: 1.6;
+  }
+}
+
+.images-section {
+  margin-top: 20px;
+}
+
+.images-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
 }
 </style> 

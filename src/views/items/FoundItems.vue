@@ -80,7 +80,8 @@
             <el-button type="primary" link @click="showDetail(row)">
               查看详情
             </el-button>
-            <el-button type="primary" link @click="$router.push(`/item/${row.itemId}/claims`)">
+            <el-button type="primary"
+            link @click="$router.push(`/item/${row.itemId}/claims`)">
               认领记录
             </el-button>
           </template>
@@ -187,8 +188,9 @@ const searchForm = reactive({
   pageSize: 10
 })
 
-const claimForm = reactive({
-  description: ''
+const claimForm = ref({
+  description: '',
+  evidence: ''
 })
 
 const fileList = ref([])
@@ -196,22 +198,7 @@ const fileList = ref([])
 const claimRules = {
   description: [
     { required: true, message: '请输入认领说明', trigger: 'blur' },
-    { min: 10, max: 500, message: '长度在 10 到 500 个字符', trigger: 'blur' }
-  ],
-  evidence: [
-    { 
-      required: false, 
-      message: '请上传证明材料',
-      trigger: 'change',
-      validator: (rule, value, callback) => {
-        if (!claimForm.evidence) {
-          callback(new Error('请上传证明材料'))
-        } else {
-          callback()
-        }
-      }
-    }
-  ]
+    { min: 10, max: 500, message: '长度在 10 到 500 个字符', trigger: 'blur' }]
 }
 
 const categories = ref([])
@@ -294,7 +281,7 @@ const handleUpload = async (options) => {
       }
     })
     
-    claimForm.evidence = data.url
+    claimForm.value.evidence = data.url
     options.onSuccess()
   } catch (error) {
     options.onError()

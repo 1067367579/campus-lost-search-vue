@@ -17,6 +17,50 @@ const router = createRouter({
       component: () => import('@/views/Register.vue'),
       meta: { requiresGuest: true }
     },
+    // 管理员路由
+    {
+      path: '/admin',
+      component: () => import('@/layouts/AdminLayout.vue'),
+      meta: { requiresAuth: true, requiresAdmin: true },
+      children: [
+        {
+          path: 'dashboard',
+          name: 'AdminDashboard',
+          component: () => import('@/views/admin/Dashboard.vue')
+        },
+        {
+          path: 'claims',
+          name: 'AdminClaims',
+          component: () => import('@/views/admin/Claims.vue')
+        },
+        {
+          path: 'complaints',
+          name: 'AdminComplaints',
+          component: () => import('@/views/admin/Complaints.vue')
+        },
+        {
+          path: 'blacklist',
+          name: 'AdminBlacklist',
+          component: () => import('@/views/admin/Blacklist.vue')
+        },
+        {
+          path: 'operation-logs',
+          name: 'AdminOperationLogs',
+          component: () => import('@/views/admin/OperationLogs.vue')
+        },
+        {
+          path: 'managers',
+          name: 'AdminManagers',
+          component: () => import('@/views/admin/Managers.vue')
+        },
+        {
+          path: 'profile',
+          name: 'AdminProfile',
+          component: () => import('@/views/admin/Profile.vue')
+        }
+      ]
+    },
+    // 用户路由
     {
       path: '/',
       component: () => import('@/layouts/DefaultLayout.vue'),
@@ -69,37 +113,6 @@ const router = createRouter({
           component: () => import('@/views/items/MyItems.vue'),
           meta: { requiresAuth: true }
         },
-        // 管理员路由
-        {
-          path: 'admin/dashboard',
-          name: 'AdminDashboard',
-          component: () => import('@/views/admin/Dashboard.vue'),
-          meta: { requiresAuth: true, requiresAdmin: true }
-        },
-        {
-          path: 'admin/claims',
-          name: 'AdminClaims',
-          component: () => import('@/views/admin/Claims.vue'),
-          meta: { requiresAuth: true, requiresAdmin: true }
-        },
-        {
-          path: 'admin/complaints',
-          name: 'AdminComplaints',
-          component: () => import('@/views/admin/Complaints.vue'),
-          meta: { requiresAuth: true, requiresAdmin: true }
-        },
-        {
-          path: 'admin/blacklist',
-          name: 'AdminBlacklist',
-          component: () => import('@/views/admin/Blacklist.vue'),
-          meta: { requiresAuth: true, requiresAdmin: true }
-        },
-        {
-          path: 'admin/categories',
-          name: 'AdminCategories',
-          component: () => import('@/views/admin/Categories.vue'),
-          meta: { requiresAuth: true, requiresAdmin: true }
-        },
         {
           path: '/edit-item/:id',
           name: 'EditItem',
@@ -117,6 +130,24 @@ const router = createRouter({
           name: 'ItemClaims',
           component: () => import('@/views/claims/ItemClaims.vue'),
           meta: { requiresAuth: true }
+        },
+        {
+          path: '/admin/operation-logs',
+          name: 'OperationLogs',
+          component: () => import('@/views/admin/OperationLogs.vue'),
+          meta: {
+            requiresAuth: true,
+            title: '操作日志'
+          }
+        },
+        {
+          path: '/admin/profile',
+          name: 'AdminProfile',
+          component: () => import('@/views/admin/Profile.vue'),
+          meta: {
+            requiresAuth: true,
+            requiresAdmin: true
+          }
         }
       ]
     },
@@ -155,16 +186,9 @@ router.beforeEach((to, from, next) => {
     }
   }
 
-  // 处理管理员路由和重定向
-  if (userStore.isAdmin) {
-    // 如果管理员访问普通用户页面，重定向到管理控制台
-    if (!to.matched.some(record => record.meta.requiresAdmin)) {
-      next('/admin/dashboard')
-      return
-    }
-  } else {
-    // 如果普通用户访问管理员页面，重定向到首页
-    if (to.matched.some(record => record.meta.requiresAdmin)) {
+  // 处理管理员路由
+  if (to.matched.some(record => record.meta.requiresAdmin)) {
+    if (!userStore.isAdmin) {
       next('/')
       return
     }
@@ -178,7 +202,7 @@ router.beforeEach((to, from, next) => {
     }
   }
 
-  // 处理根路径
+  // 处理根路径，管理员访问跳转到控制台
   if (to.path === '/') {
     if (userStore.isAdmin) {
       next('/admin/dashboard')

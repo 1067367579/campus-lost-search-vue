@@ -184,8 +184,9 @@ const searchForm = reactive({
   pageSize: 10
 })
 
-const returnForm = reactive({
-  description: ''
+const returnForm = ref({
+  description: '',
+  evidence: ''
 })
 
 const returnRules = {
@@ -299,7 +300,7 @@ const handleUpload = async (options) => {
       }
     })
   
-    returnForm.evidence = data.url
+    returnForm.value.evidence = data.url
     options.onSuccess()
   } catch (error) {
     options.onError()
