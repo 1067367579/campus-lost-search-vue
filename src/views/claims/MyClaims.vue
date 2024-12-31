@@ -16,8 +16,8 @@
         <el-table-column label="物品信息" min-width="200">
           <template #default="{ row }">
             <div>
-              <p><strong>名称：</strong>{{ row.itemInfo.itemName }}</p>
-              <p><strong>类型：</strong>{{ row.itemInfo.itemType === 0 ? '丢失物品' : '拾取物品' }}</p>
+              <p><strong>名称：</strong>{{ row.itemName }}</p>
+              <p><strong>类型：</strong>{{ row.itemType === 0 ? '丢失物品' : '拾取物品' }}</p>
             </div>
           </template>
         </el-table-column>
@@ -104,6 +104,54 @@
         <el-button type="primary" @click="submitComplaint">提交</el-button>
       </template>
     </el-dialog>
+
+    <!-- 认领详情对话框 -->
+    <el-dialog v-model="detailVisible" title="认领详情" width="600px">
+      <template v-if="currentClaim">
+        <el-descriptions :column="2" border>
+          <el-descriptions-item label="物品名称">{{ currentClaim.itemName }}</el-descriptions-item>
+          <el-descriptions-item label="物品类型">
+            {{ currentClaim.itemType === 0 ? '丢失物品' : '拾取物品' }}
+          </el-descriptions-item>
+          <el-descriptions-item label="认领状态">
+            <el-tag :type="getStatusType(currentClaim.status)">
+              {{ getStatusText(currentClaim.status) }}
+            </el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="申请时间">{{ currentClaim.createTime }}</el-descriptions-item>
+          <el-descriptions-item label="处理时间" v-if="currentClaim.status !== 0">
+            {{ currentClaim.handleTime }}
+          </el-descriptions-item>
+          <el-descriptions-item label="处理备注" v-if="currentClaim.status !== 0">
+            {{ currentClaim.handleRemark || '无' }}
+          </el-descriptions-item>
+        </el-descriptions>
+
+        <div class="claim-description">
+          <h4>认领说明</h4>
+          <p>{{ currentClaim.description }}</p>
+        </div>
+
+        <!-- 物品详情 -->
+        <div class="item-detail">
+          <h4>物品信息</h4>
+          <el-carousel v-if="currentClaim.images?.length" height="300px" indicator-position="outside">
+            <el-carousel-item v-for="url in currentClaim.images" :key="url">
+              <el-image :src="url" fit="contain" style="width: 100%; height: 100%" :preview-src-list="currentClaim.images" />
+            </el-carousel-item>
+          </el-carousel>
+
+          <el-descriptions :column="2" border>
+            <el-descriptions-item label="类别">{{ currentClaim.categoryName }}</el-descriptions-item>
+            <el-descriptions-item label="地点">{{ currentClaim.location }}</el-descriptions-item>
+            <el-descriptions-item label="时间" :span="2">
+              {{ currentClaim.itemType === 0 ? currentClaim.lostTime : currentClaim.foundTime }}
+            </el-descriptions-item>
+            <el-descriptions-item label="描述" :span="2">{{ currentClaim.itemDescription }}</el-descriptions-item>
+          </el-descriptions>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -168,7 +216,7 @@ const fetchClaims = async () => {
       pageSize: pageSize.value
     }
     const data = await request.get('claim/list', { params })
-    claimList.value = data.list
+    claimList.value = data.records
     total.value = data.total
   } catch (error) {
     ElMessage.error('获取认领列表失败')
@@ -212,8 +260,18 @@ const submitComplaint = async () => {
   })
 }
 
-const showDetail = (row) => {
-  // TODO: 实现查看详情功能
+const detailVisible = ref(false)
+
+// 查看详情
+const showDetail = async (row) => {
+  try {
+    // 获取认领详情
+    const data = await request.get(`claim/${row.claimId}`)
+    currentClaim.value = data
+    detailVisible.value = true
+  } catch (error) {
+    ElMessage.error('获取认领详情失败')
+  }
 }
 </script>
 
@@ -231,5 +289,36 @@ const showDetail = (row) => {
 .pagination {
   margin-top: 20px;
   text-align: right;
+}
+
+.claim-description {
+  margin: 20px 0;
+  
+  h4 {
+    margin-bottom: 10px;
+    color: #606266;
+  }
+  
+  p {
+    color: #666;
+    line-height: 1.5;
+  }
+}
+
+.item-detail {
+  margin-top: 20px;
+  
+  h4 {
+    margin-bottom: 15px;
+    color: #606266;
+  }
+}
+
+:deep(.el-carousel__indicators) {
+  transform: translateY(20px);
+}
+
+:deep(.el-image-viewer__wrapper) {
+  z-index: 2050;
 }
 </style> 

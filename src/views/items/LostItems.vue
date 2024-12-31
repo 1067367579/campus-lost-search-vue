@@ -73,9 +73,9 @@
               v-if="row.status === 0" 
               type="primary" 
               link 
-              @click="handleClaim(row)"
+              @click="handleReturn(row)"
             >
-              申请认领
+              提交还回
             </el-button>
             <el-button type="primary" link @click="showDetail(row)">
               查看详情
@@ -117,17 +117,37 @@
       </template>
     </el-dialog>
 
-    <!-- 认领申请对话框 -->
-    <el-dialog v-model="claimVisible" title="申请认领" width="500px">
-      <el-form ref="claimFormRef" :model="claimForm" :rules="claimRules" label-width="80px">
-        <el-form-item label="认领说明" prop="description">
-          <el-input v-model="claimForm.description" type="textarea" :rows="4" placeholder="请详细描述物品特征，以及能证明是您的物品的信息" />
+    <!-- 还回申请对话框 -->
+    <el-dialog v-model="returnVisible" title="提交还回申请" width="500px">
+      <el-form ref="returnFormRef" :model="returnForm" :rules="returnRules" label-width="100px">
+        <el-form-item label="还回说明" prop="description">
+          <el-input
+            v-model="returnForm.description"
+            type="textarea"
+            :rows="4"
+            placeholder="请描述如何找到物品，以及与失主的联系情况"
+          />
+        </el-form-item>
+
+        <el-form-item label="联系记录" prop="evidence">
+          <el-upload
+            v-model:file-list="fileList"
+            action="#"
+            :http-request="handleUpload"
+            list-type="picture-card"
+            :limit="1"
+          >
+            <el-icon><Plus /></el-icon>
+          </el-upload>
+          <div class="el-upload__tip">
+            请上传与失主的联系记录截图，作为还回证明
+          </div>
         </el-form-item>
       </el-form>
-
+      
       <template #footer>
-        <el-button @click="claimVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitClaim">提交</el-button>
+        <el-button @click="returnVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitReturn">提交</el-button>
       </template>
     </el-dialog>
   </div>
@@ -151,9 +171,9 @@ const pageSize = ref(10)
 const total = ref(0)
 const itemList = ref([])
 const detailVisible = ref(false)
-const claimVisible = ref(false)
+const returnVisible = ref(false)
 const currentItem = ref(null)
-const claimFormRef = ref(null)
+const returnFormRef = ref(null)
 const userStore = useUserStore()
 
 const searchForm = reactive({
@@ -164,13 +184,13 @@ const searchForm = reactive({
   pageSize: 10
 })
 
-const claimForm = reactive({
+const returnForm = reactive({
   description: ''
 })
 
-const claimRules = {
+const returnRules = {
   description: [
-    { required: true, message: '请输入认领说明', trigger: 'blur' },
+    { required: true, message: '请输入还回说明', trigger: 'blur' },
     { min: 10, max: 500, message: '长度在 10 到 500 个字符', trigger: 'blur' }
   ]
 }
@@ -239,30 +259,52 @@ const showDetail = (row) => {
   detailVisible.value = true
 }
 
-const handleClaim = (row) => {
+const handleReturn = (row) => {
   currentItem.value = row
-  claimVisible.value = true
+  returnVisible.value = true
 }
 
-const submitClaim = async () => {
-  if (!claimFormRef.value) return
-
-  await claimFormRef.value.validate(async (valid) => {
+const submitReturn = async () => {
+  if (!returnFormRef.value) return
+  
+  await returnFormRef.value.validate(async (valid) => {
     if (valid) {
       try {
-        await claimStore.submitClaim({
+        await request.post('claim', {
           itemId: currentItem.value.itemId,
-          itemType: 0,
-          description: claimForm.description
+          itemType: 0, // 丢失物品
+          description: returnForm.value.description,
+          evidence: returnForm.value.evidence, // 联系记录图片URL
+          claimType: 'return' // 标记为还回申请
         })
-        ElMessage.success('申请提交成功')
-        claimVisible.value = false
-        claimFormRef.value.resetFields()
+        ElMessage.success('还回申请提交成功')
+        returnVisible.value = false
+        returnFormRef.value.resetFields()
       } catch (error) {
         ElMessage.error(error.message || '申请提交失败')
       }
     }
   })
+}
+
+// 处理图片上传
+const handleUpload = async (options) => {
+  try {
+    const uploadFormData = new FormData()
+    uploadFormData.append('file', options.file)
+    
+    const data = await request.post('upload/image', uploadFormData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+  
+    returnForm.evidence = data.url
+    options.onSuccess()
+  } catch (error) {
+    options.onError()
+    ElMessage.error('图片上传失败')
+  }
 }
 
 const handleEdit = (row) => {

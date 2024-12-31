@@ -80,6 +80,9 @@
             <el-button type="primary" link @click="showDetail(row)">
               查看详情
             </el-button>
+            <el-button type="primary" link @click="$router.push(`/item/${row.itemId}/claims`)">
+              认领记录
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -119,12 +122,32 @@
 
     <!-- 认领申请对话框 -->
     <el-dialog v-model="claimVisible" title="申请认领" width="500px">
-      <el-form ref="claimFormRef" :model="claimForm" :rules="claimRules" label-width="80px">
+      <el-form ref="claimFormRef" :model="claimForm" :rules="claimRules" label-width="100px">
         <el-form-item label="认领说明" prop="description">
-          <el-input v-model="claimForm.description" type="textarea" :rows="4" placeholder="请详细描述物品特征，以及能证明是您的物品的信息" />
+          <el-input
+            v-model="claimForm.description"
+            type="textarea"
+            :rows="4"
+            placeholder="请详细描述物品特征，以及能证明您是物品主人的信息"
+          />
+        </el-form-item>
+
+        <el-form-item label="证明材料" prop="evidence">
+          <el-upload
+            v-model:file-list="fileList"
+            action="#"
+            :http-request="handleUpload"
+            list-type="picture-card"
+            :limit="1"
+          >
+            <el-icon><Plus /></el-icon>
+          </el-upload>
+          <div class="el-upload__tip">
+            请上传能证明您是物品主人的图片（如购物小票、物品照片等）
+          </div>
         </el-form-item>
       </el-form>
-
+      
       <template #footer>
         <el-button @click="claimVisible = false">取消</el-button>
         <el-button type="primary" @click="submitClaim">提交</el-button>
@@ -168,10 +191,26 @@ const claimForm = reactive({
   description: ''
 })
 
+const fileList = ref([])
+
 const claimRules = {
   description: [
     { required: true, message: '请输入认领说明', trigger: 'blur' },
     { min: 10, max: 500, message: '长度在 10 到 500 个字符', trigger: 'blur' }
+  ],
+  evidence: [
+    { 
+      required: false, 
+      message: '请上传证明材料',
+      trigger: 'change',
+      validator: (rule, value, callback) => {
+        if (!claimForm.evidence) {
+          callback(new Error('请上传证明材料'))
+        } else {
+          callback()
+        }
+      }
+    }
   ]
 }
 
@@ -243,20 +282,43 @@ const handleClaim = (row) => {
   claimVisible.value = true
 }
 
+// 处理图片上传
+const handleUpload = async (options) => {
+  try {
+    const uploadFormData = new FormData()
+    uploadFormData.append('file', options.file)
+    
+    const data = await request.post('upload/image', uploadFormData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+    
+    claimForm.evidence = data.url
+    options.onSuccess()
+  } catch (error) {
+    options.onError()
+    ElMessage.error('图片上传失败')
+  }
+}
+
 const submitClaim = async () => {
   if (!claimFormRef.value) return
-
+  
   await claimFormRef.value.validate(async (valid) => {
     if (valid) {
       try {
-        await claimStore.submitClaim({
+        await request.post('claim', {
           itemId: currentItem.value.itemId,
-          itemType: 1,
-          description: claimForm.description
+          itemType: 1, // 拾取物品
+          description: claimForm.value.description,
+          evidence: claimForm.value.evidence, // 证明材料图片URL
+          claimType: 'claim' // 标记为认领申请
         })
-        ElMessage.success('申请提交成功')
+        ElMessage.success('认领申请提交成功')
         claimVisible.value = false
         claimFormRef.value.resetFields()
+        fileList.value = [] // 清空文件列表
       } catch (error) {
         ElMessage.error(error.message || '申请提交失败')
       }

@@ -111,6 +111,12 @@ const router = createRouter({
             itemId: Number(route.params.id),
             itemType: Number(route.query.type)  // 0: 丢失物品, 1: 拾取物品
           })
+        },
+        {
+          path: '/item/:id/claims',
+          name: 'ItemClaims',
+          component: () => import('@/views/claims/ItemClaims.vue'),
+          meta: { requiresAuth: true }
         }
       ]
     },

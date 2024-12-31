@@ -31,9 +31,11 @@
       </el-col>
     </el-row>
 
-    <!-- 快捷操作和最新物品 -->
+    <!-- 主要内容区域 -->
     <el-row :gutter="20" style="margin-top: 20px">
+      <!-- 左侧：快捷操作和我的物品 -->
       <el-col :span="12">
+        <!-- 快捷操作 -->
         <el-card>
           <template #header>
             <div class="card-header">
@@ -55,8 +57,81 @@
             </el-button>
           </div>
         </el-card>
+
+        <!-- 我的物品列表 -->
+        <el-card style="margin-top: 20px">
+          <template #header>
+            <div class="card-header">
+              <h3>我的物品</h3>
+            </div>
+          </template>
+
+          <el-tabs v-model="activeTab" @tab-change="handleTabChange">
+            <el-tab-pane label="丢失物品" name="lost">
+              <el-table v-loading="loading" :data="itemList" style="width: 100%">
+                <el-table-column prop="itemName" label="物品名称" min-width="120" />
+                <el-table-column prop="categoryName" label="类别" width="100" />
+                <el-table-column label="图片" width="80">
+                  <template #default="{ row }">
+                    <el-image v-if="row.images?.length" :src="row.images[0]" fit="cover"
+                      style="width: 40px; height: 40px; cursor: pointer" :preview-src-list="row.images" />
+                    <span v-else>无图片</span>
+                  </template>
+                </el-table-column>
+                <el-table-column prop="status" label="状态" width="100">
+                  <template #default="{ row }">
+                    <el-tag :type="row.status === 0 ? 'warning' : 'success'">
+                      {{ row.status === 0 ? '未找到' : '已找到' }}
+                    </el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column label="操作" width="120" fixed="right">
+                  <template #default="{ row }">
+                    <el-button type="primary" link @click="handleEdit(row)">编辑</el-button>
+                    <el-button type="primary" link @click="showDetail(row)">详情</el-button>
+                  </template>
+                </el-table-column>
+              </el-table>
+            </el-tab-pane>
+
+            <el-tab-pane label="拾取物品" name="found">
+              <el-table v-loading="loading" :data="itemList" style="width: 100%">
+                <el-table-column prop="itemName" label="物品名称" min-width="120" />
+                <el-table-column prop="categoryName" label="类别" width="100" />
+                <el-table-column label="图片" width="80">
+                  <template #default="{ row }">
+                    <el-image v-if="row.images?.length" :src="row.images[0]" fit="cover"
+                      style="width: 40px; height: 40px; cursor: pointer" :preview-src-list="row.images" />
+                    <span v-else>无图片</span>
+                  </template>
+                </el-table-column>
+                <el-table-column prop="status" label="状态" width="100">
+                  <template #default="{ row }">
+                    <el-tag :type="row.status === 0 ? 'warning' : 'success'">
+                      {{ row.status === 0 ? '未认领' : '已认领' }}
+                    </el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column label="操作" width="120" fixed="right">
+                  <template #default="{ row }">
+                    <el-button type="primary" link @click="handleEdit(row)">编辑</el-button>
+                    <el-button type="primary" link @click="showDetail(row)">详情</el-button>
+                  </template>
+                </el-table-column>
+              </el-table>
+            </el-tab-pane>
+          </el-tabs>
+
+          <!-- 分页 -->
+          <div class="pagination">
+            <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :total="total"
+              :page-sizes="[5, 10, 20]" layout="total, sizes, prev, pager, next" @size-change="handleSizeChange"
+              @current-change="handleCurrentChange" />
+          </div>
+        </el-card>
       </el-col>
 
+      <!-- 右侧：最新物品 -->
       <el-col :span="12">
         <el-card>
           <template #header>
@@ -65,105 +140,31 @@
             </div>
           </template>
           <el-table :data="recentItems" style="width: 100%">
-            <el-table-column prop="itemName" label="物品名称" />
-            <el-table-column prop="type" label="类型">
+            <el-table-column prop="itemName" label="物品名称" min-width="120" />
+            <el-table-column prop="categoryName" label="类别" width="100" />
+            <el-table-column label="图片" width="80">
               <template #default="{ row }">
-                {{ row.type === 0 ? '丢失' : '拾取' }}
+                <el-image v-if="row.images?.length" :src="row.images[0]" fit="cover"
+                  style="width: 40px; height: 40px; cursor: pointer" :preview-src-list="row.images" />
+                <span v-else>无图片</span>
               </template>
             </el-table-column>
-            <el-table-column prop="createTime" label="发布时间" width="180" />
+            <el-table-column prop="itemType" label="类型" width="80">
+              <template #default="{ row }">
+                <el-tag :type="row.itemType === 0 ? 'danger' : 'success'">
+                  {{ row.itemType === 0 ? '丢失' : '拾取' }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" width="80" fixed="right">
+              <template #default="{ row }">
+                <el-button type="primary" link @click="showDetail(row)">详情</el-button>
+              </template>
+            </el-table-column>
           </el-table>
         </el-card>
       </el-col>
     </el-row>
-
-    <!-- 我的物品列表 -->
-    <el-card style="margin-top: 20px">
-      <template #header>
-        <div class="card-header">
-          <h3>我的物品</h3>
-        </div>
-      </template>
-
-      <el-tabs v-model="activeTab" @tab-change="handleTabChange">
-        <el-tab-pane label="丢失物品" name="lost">
-          <el-table v-loading="loading" :data="itemList" style="width: 100%">
-            <el-table-column prop="itemName" label="物品名称" min-width="120" />
-            <el-table-column prop="categoryName" label="类别" width="100" />
-            <el-table-column label="图片" width="80">
-              <template #default="{ row }">
-                <el-image 
-                  v-if="row.images?.length" 
-                  :src="row.images[0]" 
-                  fit="cover" 
-                  style="width: 40px; height: 40px; cursor: pointer"
-                  :preview-src-list="row.images"
-                />
-                <span v-else>无图片</span>
-              </template>
-            </el-table-column>
-            <el-table-column prop="status" label="状态" width="100">
-              <template #default="{ row }">
-                <el-tag :type="row.status === 0 ? 'warning' : 'success'">
-                  {{ row.status === 0 ? '未找到' : '已找到' }}
-                </el-tag>
-              </template>
-            </el-table-column>
-            <el-table-column label="操作" width="150" fixed="right">
-              <template #default="{ row }">
-                <el-button type="primary" link @click="handleEdit(row)">编辑</el-button>
-                <el-button type="primary" link @click="showDetail(row)">详情</el-button>
-              </template>
-            </el-table-column>
-          </el-table>
-        </el-tab-pane>
-
-        <el-tab-pane label="拾取物品" name="found">
-          <el-table v-loading="loading" :data="itemList" style="width: 100%">
-            <el-table-column prop="itemName" label="物品名称" min-width="120" />
-            <el-table-column prop="categoryName" label="类别" width="100" />
-            <el-table-column label="图片" width="80">
-              <template #default="{ row }">
-                <el-image 
-                  v-if="row.images?.length" 
-                  :src="row.images[0]" 
-                  fit="cover" 
-                  style="width: 40px; height: 40px; cursor: pointer"
-                  :preview-src-list="row.images"
-                />
-                <span v-else>无图片</span>
-              </template>
-            </el-table-column>
-            <el-table-column prop="status" label="状态" width="100">
-              <template #default="{ row }">
-                <el-tag :type="row.status === 0 ? 'warning' : 'success'">
-                  {{ row.status === 0 ? '未认领' : '已认领' }}
-                </el-tag>
-              </template>
-            </el-table-column>
-            <el-table-column label="操作" width="150" fixed="right">
-              <template #default="{ row }">
-                <el-button type="primary" link @click="handleEdit(row)">编辑</el-button>
-                <el-button type="primary" link @click="showDetail(row)">详情</el-button>
-              </template>
-            </el-table-column>
-          </el-table>
-        </el-tab-pane>
-      </el-tabs>
-
-      <!-- 分页 -->
-      <div class="pagination">
-        <el-pagination
-          v-model:current-page="currentPage"
-          v-model:page-size="pageSize"
-          :total="total"
-          :page-sizes="[5, 10, 20]"
-          layout="total, sizes, prev, pager, next"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-        />
-      </div>
-    </el-card>
 
     <!-- 物品详情对话框 -->
     <el-dialog v-model="detailVisible" :title="currentItem?.itemName" width="800px">
@@ -172,7 +173,8 @@
           <!-- 图片轮播 -->
           <el-carousel v-if="currentItem.images?.length" height="400px" indicator-position="outside">
             <el-carousel-item v-for="url in currentItem.images" :key="url">
-              <el-image :src="url" fit="contain" style="width: 100%; height: 100%" :preview-src-list="currentItem.images" />
+              <el-image :src="url" fit="contain" style="width: 100%; height: 100%"
+                :preview-src-list="currentItem.images" />
             </el-carousel-item>
           </el-carousel>
 
@@ -181,7 +183,10 @@
             <p><strong>描述：</strong>{{ currentItem.description }}</p>
             <p><strong>地点：</strong>{{ currentItem.location }}</p>
             <p><strong>时间：</strong>{{ currentItem.itemType === 0 ? currentItem.lostTime : currentItem.foundTime }}</p>
-            <p><strong>状态：</strong>{{ currentItem.status === 0 ? (currentItem.itemType === 0 ? '未找到' : '未认领') : (currentItem.itemType === 0 ? '已找到' : '已认领') }}</p>
+            <p><strong>状态：</strong>{{ currentItem.status === 0 ? (currentItem.itemType === 0 ? '未找到' : '未认领') :
+              (currentItem.itemType === 0 ? '已找到' : '已认领') }}</p>
+            <p><strong>联系邮箱：</strong>{{ currentItem.email }}</p>
+            <p><strong>联系电话：</strong>{{ currentItem.phone }}</p>
           </div>
         </div>
       </template>
@@ -235,8 +240,12 @@ const fetchStats = async () => {
 
 const fetchRecentItems = async () => {
   try {
-    const data = await request.get('recent-items')
-    recentItems.value = data
+    const params = {
+      pageNum: 1,
+      pageSize: 8
+    }
+    const data = await request.get('recent-items', { params })
+    recentItems.value = data.records
   } catch (error) {
     console.error('获取最近物品失败:', error)
   }
@@ -378,4 +387,4 @@ const handleEdit = (row) => {
     margin: 10px 0;
   }
 }
-</style> 
+</style>
