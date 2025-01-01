@@ -22,11 +22,16 @@
             <!-- 时间范围选择 -->
             <el-date-picker
               v-model="dateRange"
-              type="daterange"
+              type="datetimerange"
               range-separator="至"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-              value-format="YYYY-MM-DD"
+              start-placeholder="开始时间"
+              end-placeholder="结束时间"
+              value-format="YYYY-MM-DDTHH:mm:ss"
+              format="YYYY-MM-DD HH:mm:ss"
+              :default-time="[
+                new Date(2000, 1, 1, 0, 0, 0),
+                new Date(2000, 1, 1, 23, 59, 59)
+              ]"
               @change="handleDateRangeChange"
             />
           </div>
@@ -179,6 +184,7 @@ const getOperationTypeText = (type) => {
 // 日期范围变化
 const handleDateRangeChange = (val) => {
   if (val) {
+    // 确保时间格式符合 ISO 8601 标准
     searchForm.startTime = val[0]
     searchForm.endTime = val[1]
   } else {
