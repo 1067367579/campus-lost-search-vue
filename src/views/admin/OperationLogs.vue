@@ -13,10 +13,10 @@
               style="width: 150px"
               @change="handleSearch"
             >
-              <el-option label="认领处理" value="CLAIM_PROCESS" />
-              <el-option label="投诉处理" value="COMPLAINT_PROCESS" />
-              <el-option label="黑名单管理" value="BLACKLIST_MANAGE" />
-              <el-option label="类别管理" value="CATEGORY_MANAGE" />
+              <el-option label="处理认领" value="处理认领" />
+              <el-option label="处理投诉" value="处理投诉" />
+              <el-option label="管理黑名单" value="管理黑名单" />
+              <el-option label="管理类别" value="管理类别" />
             </el-select>
 
             <!-- 时间范围选择 -->
@@ -35,7 +35,7 @@
 
       <!-- 日志列表 -->
       <el-table v-loading="loading" :data="logList" style="width: 100%">
-        <el-table-column label="操作人" prop="adminName" width="120" />
+        <el-table-column label="操作人" prop="username" width="120" />
         
         <el-table-column label="操作类型" width="150">
           <template #default="{ row }">
@@ -81,14 +81,13 @@
     <el-dialog v-model="detailVisible" title="操作详情" width="600px">
       <template v-if="currentLog">
         <el-descriptions :column="2" border>
-          <el-descriptions-item label="操作人">{{ currentLog.adminName }}</el-descriptions-item>
+          <el-descriptions-item label="操作人">{{ currentLog.username }}</el-descriptions-item>
           <el-descriptions-item label="操作类型">
             <el-tag :type="getOperationTypeTag(currentLog.operationType)">
               {{ getOperationTypeText(currentLog.operationType) }}
             </el-tag>
           </el-descriptions-item>
           <el-descriptions-item label="操作时间">{{ currentLog.createTime }}</el-descriptions-item>
-          <el-descriptions-item label="IP地址">{{ currentLog.ipAddress }}</el-descriptions-item>
         </el-descriptions>
 
         <div class="detail-section">

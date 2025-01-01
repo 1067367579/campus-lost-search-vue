@@ -23,7 +23,7 @@
               <el-icon><Box /></el-icon>
             </div>
             <div class="stat-info">
-              <div class="label">总物品数</div>
+              <div class="label">待完成物品数</div>
               <div class="number">{{ stats.totalItems }}</div>
             </div>
           </div>
@@ -119,7 +119,7 @@
       </template>
 
       <el-table :data="recentLogs" style="width: 100%">
-        <el-table-column prop="adminName" label="操作人" width="120" />
+        <el-table-column prop="username" label="操作人" width="120" />
         <el-table-column prop="operationType" label="操作类型" width="150" />
         <el-table-column prop="operationContent" label="操作内容" min-width="300" show-overflow-tooltip />
         <el-table-column prop="createTime" label="操作时间" width="180" />

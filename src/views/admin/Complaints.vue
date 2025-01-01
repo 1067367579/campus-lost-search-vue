@@ -23,9 +23,9 @@
         <el-table-column label="认领信息" min-width="200">
           <template #default="{ row }">
             <div>
-              <p><strong>物品名称：</strong>{{ row.claimInfo.itemName }}</p>
-              <p><strong>申请类型：</strong>{{ row.claimInfo.claimType === 'claim' ? '认领申请' : '还回申请' }}</p>
-              <p><strong>申请时间：</strong>{{ row.claimInfo.createTime }}</p>
+              <p><strong>物品名称：</strong>{{ row.itemName }}</p>
+              <p><strong>申请类型：</strong>{{ row.claimType === 'claim' ? '认领申请' : '还回申请' }}</p>
+              <p><strong>申请时间：</strong>{{ row.createTime }}</p>
             </div>
           </template>
         </el-table-column>
@@ -77,14 +77,14 @@
     <el-dialog v-model="detailVisible" title="投诉详情" width="800px">
       <template v-if="currentComplaint">
         <el-descriptions :column="2" border>
-          <el-descriptions-item label="投诉人">{{ currentComplaint.username }}</el-descriptions-item>
+          <el-descriptions-item label="投诉人">{{ currentComplaint.complainantUserName }}</el-descriptions-item>
           <el-descriptions-item label="投诉时间">{{ currentComplaint.createTime }}</el-descriptions-item>
           <el-descriptions-item label="状态">
             <el-tag :type="currentComplaint.status === 0 ? 'warning' : 'success'">
               {{ currentComplaint.status === 0 ? '待处理' : '已处理' }}
             </el-tag>
           </el-descriptions-item>
-          <el-descriptions-item label="处理时间" v-if="currentComplaint.handleTime">
+          <el-descriptions-item label="领回单处理时间" v-if="currentComplaint.handleTime">
             {{ currentComplaint.handleTime }}
           </el-descriptions-item>
         </el-descriptions>
@@ -92,21 +92,21 @@
         <div class="detail-section">
           <h4>认领申请信息</h4>
           <el-descriptions :column="2" border>
-            <el-descriptions-item label="物品名称">{{ currentComplaint.claimInfo.itemName }}</el-descriptions-item>
+            <el-descriptions-item label="物品名称">{{ currentComplaint.itemName }}</el-descriptions-item>
             <el-descriptions-item label="申请类型">
-              {{ currentComplaint.claimInfo.claimType === 'claim' ? '认领申请' : '还回申请' }}
+              {{ currentComplaint.claimType === 'claim' ? '认领申请' : '还回申请' }}
             </el-descriptions-item>
-            <el-descriptions-item label="申请人">{{ currentComplaint.claimInfo.username }}</el-descriptions-item>
-            <el-descriptions-item label="申请时间">{{ currentComplaint.claimInfo.createTime }}</el-descriptions-item>
-            <el-descriptions-item label="申请说明">{{ currentComplaint.claimInfo.description }}</el-descriptions-item>
+            <el-descriptions-item label="申请人">{{ currentComplaint.applicantUserName }}</el-descriptions-item>
+            <el-descriptions-item label="申请时间">{{ currentComplaint.claimCreateTime }}</el-descriptions-item>
+            <el-descriptions-item label="申请说明">{{ currentComplaint.claimDescription }}</el-descriptions-item>
           </el-descriptions>
 
           <!-- 证明材料 -->
-          <div v-if="currentComplaint.claimInfo.evidence" class="evidence-section">
+          <div v-if="currentComplaint.evidence" class="evidence-section">
             <h4>申请证明材料</h4>
             <el-image
-              :src="currentComplaint.claimInfo.evidence"
-              :preview-src-list="[currentComplaint.claimInfo.evidence]"
+              :src="currentComplaint.evidence"
+              :preview-src-list="[currentComplaint.evidence]"
               fit="contain"
               style="max-width: 100%; max-height: 400px;"
             />

@@ -17,9 +17,9 @@
         <el-table-column label="认领信息" min-width="200">
           <template #default="{ row }">
             <div>
-              <p><strong>物品名称：</strong>{{ row.claimInfo.itemName }}</p>
-              <p><strong>申请类型：</strong>{{ row.claimInfo.claimType === 'claim' ? '认领申请' : '还回申请' }}</p>
-              <p><strong>申请时间：</strong>{{ row.claimInfo.createTime }}</p>
+              <p><strong>物品名称：</strong>{{ row.itemName }}</p>
+              <p><strong>申请类型：</strong>{{ row.claimType === 'claim' ? '认领申请' : '还回申请' }}</p>
+              <p><strong>申请时间：</strong>{{ row.createTime }}</p>
             </div>
           </template>
         </el-table-column>
@@ -74,13 +74,13 @@
         <div class="detail-section">
           <h4>认领申请信息</h4>
           <el-descriptions :column="2" border>
-            <el-descriptions-item label="物品名称">{{ currentComplaint.claimInfo.itemName }}</el-descriptions-item>
+            <el-descriptions-item label="物品名称">{{ currentComplaint.itemName }}</el-descriptions-item>
             <el-descriptions-item label="申请类型">
-              {{ currentComplaint.claimInfo.claimType === 'claim' ? '认领申请' : '还回申请' }}
+              {{ currentComplaint.claimType === 'claim' ? '认领申请' : '还回申请' }}
             </el-descriptions-item>
-            <el-descriptions-item label="申请人">{{ currentComplaint.claimInfo.username }}</el-descriptions-item>
-            <el-descriptions-item label="申请时间">{{ currentComplaint.claimInfo.createTime }}</el-descriptions-item>
-            <el-descriptions-item label="申请说明">{{ currentComplaint.claimInfo.description }}</el-descriptions-item>
+            <el-descriptions-item label="申请人">{{ currentComplaint.username }}</el-descriptions-item>
+            <el-descriptions-item label="申请时间">{{ currentComplaint.claimCreateTime }}</el-descriptions-item>
+            <el-descriptions-item label="申请说明">{{ currentComplaint.description }}</el-descriptions-item>
           </el-descriptions>
         </div>
 

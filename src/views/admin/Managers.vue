@@ -217,7 +217,7 @@ const handleStatusChange = async (row) => {
       }
     )
     
-    await request.put(`admin/managers/${row.userId}/status`, {
+    await request.put(`admin/managers/${row.userId}/${row.status}`, {
       status: row.status === 1 ? 0 : 1
     })
     ElMessage.success('操作成功')
