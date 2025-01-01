@@ -34,6 +34,11 @@
           <span>黑名单管理</span>
         </el-menu-item>
 
+        <el-menu-item index="/admin/categories">
+          <el-icon><Menu /></el-icon>
+          <span>类别管理</span>
+        </el-menu-item>
+
         <el-menu-item index="/admin/operation-logs">
           <el-icon><List /></el-icon>
           <span>操作日志</span>
@@ -91,7 +96,8 @@ import {
   List,
   UserFilled,
   User,
-  ArrowDown
+  ArrowDown,
+  Menu
 } from '@element-plus/icons-vue'
 
 const route = useRoute()
