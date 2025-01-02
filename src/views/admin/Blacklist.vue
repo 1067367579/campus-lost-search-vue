@@ -5,22 +5,18 @@
         <div class="header">
           <h3>黑名单管理</h3>
           <div class="header-right">
-            <el-form :inline="true" :model="searchForm">
-              <el-form-item label="关键词">
-                <el-input
-                  v-model="searchForm.keyword"
-                  placeholder="搜索用户名/学号"
-                  clearable
-                  @input="handleSearch"
-                  @keyup.enter="handleSearch"
-                  @clear="handleSearch"
-                />
-              </el-form-item>
-
-              <el-form-item>
-                <el-button @click="resetSearch">重置</el-button>
-              </el-form-item>
-            </el-form>
+            <el-input
+              v-model="searchForm.username"
+              placeholder="搜索用户名"
+              style="width: 300px"
+              clearable
+              @clear="handleSearch"
+              @keyup.enter="handleSearch"
+            >
+              <template #append>
+                <el-button :icon="Search" @click="handleSearch" />
+              </template>
+            </el-input>
           </div>
         </div>
       </template>
@@ -187,13 +183,6 @@ const handleCurrentChange = (val) => {
 // 搜索相关
 const handleSearch = () => {
   currentPage.value = 1
-  fetchBlacklist()
-}
-
-const resetSearch = () => {
-  searchForm.username = ''
-  searchForm.pageNum = 1
-  searchForm.pageSize = 10
   fetchBlacklist()
 }
 

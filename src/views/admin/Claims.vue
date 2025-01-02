@@ -5,48 +5,19 @@
         <div class="header">
           <h3>认领申请管理</h3>
           <div class="header-right">
-            <!-- 搜索栏 -->
-            <el-form :inline="true" :model="searchForm">
-              <el-form-item label="物品类型">
-                <el-select 
-                  v-model="searchForm.itemType" 
-                  placeholder="全部类型" 
-                  clearable
-                  @change="handleSearch"
-                >
-                  <el-option label="丢失物品" :value="0" />
-                  <el-option label="拾取物品" :value="1" />
-                </el-select>
-              </el-form-item>
-
-              <el-form-item label="状态">
-                <el-select 
-                  v-model="searchForm.status" 
-                  placeholder="全部状态" 
-                  clearable
-                  @change="handleSearch"
-                >
-                  <el-option label="待处理" :value="0" />
-                  <el-option label="已通过" :value="1" />
-                  <el-option label="已拒绝" :value="2" />
-                </el-select>
-              </el-form-item>
-
-              <el-form-item label="关键词">
-                <el-input
-                  v-model="searchForm.keyword"
-                  placeholder="搜索物品名称/申请人"
-                  clearable
-                  @input="handleSearch"
-                  @keyup.enter="handleSearch"
-                  @clear="handleSearch"
-                />
-              </el-form-item>
-
-              <el-form-item>
-                <el-button @click="resetSearch">重置</el-button>
-              </el-form-item>
-            </el-form>
+            <!-- 申请类型筛选 -->
+            <el-radio-group v-model="searchForm.claimType" @change="handleSearch">
+              <el-radio-button label="">全部</el-radio-button>
+              <el-radio-button label="claim">认领申请</el-radio-button>
+              <el-radio-button label="return">还回申请</el-radio-button>
+            </el-radio-group>
+            <!-- 状态筛选 -->
+            <el-radio-group v-model="searchForm.status" @change="handleSearch">
+              <el-radio-button :label="null">全部</el-radio-button>
+              <el-radio-button :label="0">待处理</el-radio-button>
+              <el-radio-button :label="1">已通过</el-radio-button>
+              <el-radio-button :label="2">已拒绝</el-radio-button>
+            </el-radio-group>
           </div>
         </div>
       </template>
@@ -292,9 +263,8 @@ const blacklistRules = {
 
 // 搜索表单
 const searchForm = reactive({
-  itemType: '',  // 物品类型：0丢失物品，1拾取物品
+  claimType: '',  // 认领类型：claim 或 return
   status: null,   // 状态：0待处理，1已通过，2已拒绝
-  keyword: '',
   pageNum: 1,
   pageSize: 10
 })
@@ -463,14 +433,6 @@ const handleRevoke = async (row) => {
       ElMessage.error('撤销失败')
     }
   }
-}
-
-// 重置搜索
-const resetSearch = () => {
-  searchForm.itemType = ''
-  searchForm.status = null
-  searchForm.keyword = ''
-  fetchClaims()
 }
 
 onMounted(() => {
