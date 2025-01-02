@@ -14,79 +14,125 @@
       <div class="search-bar">
         <el-form :inline="true" :model="searchForm">
           <el-form-item label="物品类别">
-            <el-select v-model="searchForm.categoryId" placeholder="全部类别" style="width: 200px" clearable>
-              <el-option v-for="category in categories" :key="category.categoryId" :label="category.name"
-                :value="category.categoryId" :disabled="category.status === 0" />
+            <el-select 
+              v-model="searchForm.categoryId" 
+              placeholder="全部类别" 
+              style="width: 200px" 
+              clearable
+              @change="handleSearch"
+            >
+              <el-option
+                v-for="category in categories"
+                :key="category.categoryId"
+                :label="category.name"
+                :value="category.categoryId"
+                :disabled="category.status === 0"
+              />
             </el-select>
           </el-form-item>
 
           <el-form-item label="关键词">
-            <el-input v-model="searchForm.keyword" placeholder="搜索物品名称、描述" clearable />
+            <el-input
+              v-model="searchForm.keyword"
+              placeholder="搜索物品名称、描述"
+              clearable
+              @input="handleSearch"
+              @keyup.enter="handleSearch"
+              @clear="handleSearch"
+            />
           </el-form-item>
 
           <el-form-item label="状态">
-            <el-select v-model="searchForm.status" placeholder="全部状态" style="width: 200px" clearable>
+            <el-select 
+              v-model="searchForm.status" 
+              placeholder="全部状态" 
+              style="width: 200px" 
+              clearable
+              @change="handleSearch"
+            >
               <el-option label="未认领" :value="0" />
               <el-option label="已认领" :value="1" />
             </el-select>
           </el-form-item>
 
           <el-form-item>
-            <el-button type="primary" @click="handleSearch">搜索</el-button>
             <el-button @click="resetSearch">重置</el-button>
           </el-form-item>
         </el-form>
       </div>
 
       <!-- 物品列表 -->
-      <el-table v-loading="loading" :data="itemList" style="width: 100%">
-        <el-table-column prop="itemName" label="物品名称" min-width="120" />
-        <el-table-column prop="categoryName" label="类别" width="120" />
-        <el-table-column label="图片" width="100">
-          <template #default="{ row }">
-            <el-image v-if="row.images && row.images.length > 0" :src="row.images[0]" :preview-src-list="row.images"
-              fit="cover" style="width: 50px; height: 50px; cursor: pointer" />
-            <span v-else>无图片</span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="description" label="描述" min-width="200" show-overflow-tooltip />
-        <el-table-column prop="location" label="拾取地点" min-width="150" />
-        <el-table-column prop="foundTime" label="拾取时间" width="180" />
-        <el-table-column prop="status" label="状态" width="100">
-          <template #default="{ row }">
-            <el-tag :type="row.status === 0 ? 'warning' : 'success'">
-              {{ row.status === 0 ? '未认领' : '已认领' }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="200" fixed="right">
-          <template #default="{ row }">
+      <div class="items-grid">
+        <el-card v-for="item in itemList" :key="item.itemId" class="item-card">
+          <!-- 物品图片 -->
+          <div class="item-image">
+            <el-image 
+              v-if="item.images?.length" 
+              :src="item.images[0]"
+              :preview-src-list="item.images"
+              fit="cover"
+            />
+            <el-empty v-else description="暂无图片" />
+          </div>
+
+          <!-- 物品信息 -->
+          <div class="item-info">
+            <h3 class="item-name">{{ item.itemName }}</h3>
+            <div class="item-meta">
+              <el-tag size="small">{{ item.categoryName }}</el-tag>
+              <el-tag 
+                :type="item.status === 0 ? 'warning' : 'success'"
+                size="small"
+              >
+                {{ item.status === 0 ? '未认领' : '已认领' }}
+              </el-tag>
+            </div>
+            <p class="item-desc">{{ item.description }}</p>
+            <p class="item-location">
+              <el-icon><Location /></el-icon>
+              {{ item.location }}
+            </p>
+            <p class="item-time">
+              <el-icon><Timer /></el-icon>
+              {{ item.foundTime }}
+            </p>
+          </div>
+
+          <!-- 操作按钮 -->
+          <div class="item-actions">
             <el-button 
-              v-if="row.username === userStore.userInfo?.username"
+              v-if="item.username === userStore.userInfo?.username"
               type="primary" 
               link 
-              @click="handleEdit(row)"
+              @click="handleEdit(item)"
             >
               编辑
             </el-button>
             <el-button 
-              v-if="row.status === 0" 
+              v-if="item.status === 0" 
               type="primary" 
               link 
-              @click="handleClaim(row)"
+              @click="handleClaim(item)"
             >
               申请认领
             </el-button>
-            <el-button type="primary" link @click="showDetail(row)">
+            <el-button 
+              type="primary" 
+              link 
+              @click="showDetail(item)"
+            >
               查看详情
             </el-button>
-            <el-button type="primary"
-            link @click="$router.push(`/item/${row.itemId}/claims`)">
+            <el-button 
+              type="primary"
+              link 
+              @click="$router.push(`/item/${item.itemId}/claims`)"
+            >
               认领记录
             </el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+          </div>
+        </el-card>
+      </div>
 
       <!-- 分页 -->
       <div class="pagination">
@@ -367,6 +413,86 @@ const handleEdit = (row) => {
 
   p {
     margin: 10px 0;
+  }
+}
+
+/* 添加网格布局样式 */
+.items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.item-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.item-image {
+  height: 160px;
+  overflow: hidden;
+  border-radius: 4px;
+  
+  :deep(.el-image) {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.item-info {
+  flex: 1;
+  padding: 12px 0;
+}
+
+.item-name {
+  font-size: 15px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.item-meta {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.item-desc {
+  color: #666;
+  margin-bottom: 10px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.item-location,
+.item-time {
+  color: #999;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 5px;
+}
+
+.item-actions {
+  border-top: 1px solid #eee;
+  padding-top: 10px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* 响应式布局 */
+@media screen and (max-width: 768px) {
+  .items-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .item-image {
+    height: 160px;
   }
 }
 </style> 

@@ -3,7 +3,12 @@
     <!-- 统计卡片 -->
     <el-row :gutter="20">
       <el-col :span="12">
-        <el-card shadow="hover">
+        <el-card 
+          shadow="hover" 
+          class="statistic-card"
+          @click="$router.push('/lost-items')"
+          style="cursor: pointer"
+        >
           <div class="statistic-card">
             <div class="icon-wrapper lost">
               <el-icon><Search /></el-icon>
@@ -17,7 +22,12 @@
       </el-col>
 
       <el-col :span="12">
-        <el-card shadow="hover">
+        <el-card 
+          shadow="hover" 
+          class="statistic-card"
+          @click="$router.push('/found-items')"
+          style="cursor: pointer"
+        >
           <div class="statistic-card">
             <div class="icon-wrapper found">
               <el-icon><Box /></el-icon>

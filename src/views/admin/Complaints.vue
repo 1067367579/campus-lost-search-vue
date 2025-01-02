@@ -4,11 +4,34 @@
       <template #header>
         <div class="header">
           <h3>投诉管理</h3>
-          <el-radio-group v-model="searchForm.status" @change="handleSearch">
-            <el-radio-button :label="null">全部</el-radio-button>
-            <el-radio-button :label="0">待处理</el-radio-button>
-            <el-radio-button :label="1">已处理</el-radio-button>
-          </el-radio-group>
+          <el-form :inline="true" :model="searchForm">
+            <el-form-item label="状态">
+              <el-select 
+                v-model="searchForm.status" 
+                placeholder="全部状态" 
+                clearable
+                @change="handleSearch"
+              >
+                <el-option label="待处理" :value="0" />
+                <el-option label="已处理" :value="1" />
+              </el-select>
+            </el-form-item>
+
+            <el-form-item label="关键词">
+              <el-input
+                v-model="searchForm.keyword"
+                placeholder="搜索投诉人/被投诉人"
+                clearable
+                @input="handleSearch"
+                @keyup.enter="handleSearch"
+                @clear="handleSearch"
+              />
+            </el-form-item>
+
+            <el-form-item>
+              <el-button @click="resetSearch">重置</el-button>
+            </el-form-item>
+          </el-form>
         </div>
       </template>
 
@@ -264,6 +287,12 @@ const handleCurrentChange = (val) => {
 // 搜索相关
 const handleSearch = () => {
   currentPage.value = 1
+  fetchComplaints()
+}
+
+const resetSearch = () => {
+  searchForm.status = null
+  searchForm.keyword = ''
   fetchComplaints()
 }
 

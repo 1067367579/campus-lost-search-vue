@@ -19,28 +19,55 @@
       <div class="search-bar">
         <el-form :inline="true" :model="searchForm">
           <el-form-item label="物品类型">
-            <el-select v-model="searchForm.itemType" placeholder="全部类型" style="width: 150px" clearable>
+            <el-select 
+              v-model="searchForm.itemType" 
+              placeholder="全部类型" 
+              style="width: 150px" 
+              clearable
+              @change="handleSearch"
+            >
               <el-option label="丢失物品" :value="0" />
               <el-option label="拾取物品" :value="1" />
             </el-select>
           </el-form-item>
 
           <el-form-item label="物品类别">
-            <el-select v-model="searchForm.categoryId" placeholder="全部类别" style="width: 200px" clearable>
-              <el-option v-for="category in categories" :key="category.categoryId" :label="category.name"
-                :value="category.categoryId" />
+            <el-select 
+              v-model="searchForm.categoryId" 
+              placeholder="全部类别" 
+              style="width: 200px" 
+              clearable
+              @change="handleSearch"
+            >
+              <el-option 
+                v-for="category in categories" 
+                :key="category.categoryId" 
+                :label="category.name"
+                :value="category.categoryId" 
+              />
             </el-select>
           </el-form-item>
 
           <el-form-item label="状态">
-            <el-select v-model="searchForm.status" placeholder="全部状态" style="width: 150px" clearable>
-              <el-option :label="searchForm.itemType === 0 ? '未找到' : '未认领'" :value="0" />
-              <el-option :label="searchForm.itemType === 0 ? '已找到' : '已认领'" :value="1" />
+            <el-select 
+              v-model="searchForm.status" 
+              placeholder="全部状态" 
+              style="width: 150px" 
+              clearable
+              @change="handleSearch"
+            >
+              <el-option 
+                label="未完成" 
+                :value="0" 
+              />
+              <el-option 
+                label="已完成" 
+                :value="1" 
+              />
             </el-select>
           </el-form-item>
 
           <el-form-item>
-            <el-button type="primary" @click="handleSearch">搜索</el-button>
             <el-button @click="resetSearch">重置</el-button>
           </el-form-item>
         </el-form>
@@ -66,7 +93,7 @@
         </el-table-column>
         <el-table-column prop="description" label="描述" min-width="200" show-overflow-tooltip />
         <el-table-column prop="location" label="地点" min-width="150" />
-        <el-table-column :prop="row => row.itemType === 0 ? 'lostTime' : 'foundTime'" label="时间" width="180" />
+        <el-table-column prop="createTime" label="时间" width="180" />
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
             <el-tag :type="row.status === 0 ? 'warning' : 'success'">
@@ -137,9 +164,9 @@ const currentItem = ref(null)
 const categories = ref([])
 
 const searchForm = reactive({
-  itemType: '',
-  categoryId: '',
-  status: '',
+  itemType: null,
+  categoryId: null,
+  status: null,
   pageNum: 1,
   pageSize: 10
 })
@@ -163,6 +190,11 @@ const fetchItems = async () => {
       pageNum: currentPage.value,
       pageSize: pageSize.value
     }
+    Object.keys(params).forEach(key => {
+      if (params[key] === null) {
+        delete params[key]
+      }
+    })
     const data = await request.get('item/my-items', { params })
     itemList.value = data.records
     total.value = data.total
@@ -180,16 +212,24 @@ onMounted(() => {
 
 const handleSearch = () => {
   currentPage.value = 1
+  const params = {
+    ...searchForm,
+    pageNum: currentPage.value,
+    pageSize: pageSize.value
+  }
+  Object.keys(params).forEach(key => {
+    if (params[key] === null) {
+      delete params[key]
+    }
+  })
   fetchItems()
 }
 
 const resetSearch = () => {
-  Object.assign(searchForm, {
-    itemType: '',
-    categoryId: '',
-    status: ''
-  })
-  handleSearch()
+  searchForm.itemType = null
+  searchForm.categoryId = null
+  searchForm.status = null
+  fetchItems()
 }
 
 const handleSizeChange = (val) => {

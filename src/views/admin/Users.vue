@@ -10,14 +10,20 @@
               placeholder="搜索用户名"
               style="width: 300px"
               clearable
-              @clear="handleSearch"
+              @input="handleSearch"
               @keyup.enter="handleSearch"
+              @clear="handleSearch"
             >
               <template #append>
                 <el-button :icon="Search" @click="handleSearch" />
               </template>
             </el-input>
-            <el-select v-model="searchForm.status" placeholder="状态" clearable @change="handleSearch">
+            <el-select 
+              v-model="searchForm.status" 
+              placeholder="状态" 
+              clearable 
+              @change="handleSearch"
+            >
               <el-option label="正常" :value="1" />
               <el-option label="已冻结" :value="0" />
             </el-select>
