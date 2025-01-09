@@ -24,23 +24,17 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
   },
-  server: {
-    host: 'localhost',
-    port: 5173,
-    https: false,
-    open: true,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:8080',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '')
+  build: {
+    outDir: 'dist', // 输出目录
+    assetsDir: 'assets', // 静态资源目录
+    chunkSizeWarningLimit: 1500, // 文件大小警告的限制
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'element-plus': ['element-plus']
+        }
       }
     }
   },
-  define: {
-    'process.env': {
-      // 配置 Element Plus 的时间格式
-      ELEMENT_PLUS_DATE_FORMAT: JSON.stringify('YYYY-MM-DD HH:mm:ss')
-    }
-  }
+  base: '/' // 部署在根路径
 })

@@ -251,6 +251,7 @@ const submitClaim = async () => {
       try {
         await request.post('claim', {
           itemId: route.params.id,
+          itemType: itemInfo.value.itemType,
           description: claimForm.value.description
         })
         ElMessage.success('申请提交成功')
